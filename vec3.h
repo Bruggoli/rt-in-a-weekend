@@ -34,6 +34,8 @@ double vec3_dot(vec3 u, vec3 v);
 
 double vec3_length(vec3 v);
 
+double vec3_length_squared(vec3 v);
+
 vec3 vec3_unit(vec3 v);
 
 #endif

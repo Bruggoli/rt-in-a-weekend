@@ -8,16 +8,16 @@
 
 double hit_sphere(point3 center, double radius, ray r) {
   vec3 oc = vec3_sub(center,  r.orig);
-  double a = vec3_dot(r.dir, r.dir);
-  double b = -2.0 * vec3_dot(r.dir, oc);
-  double c = vec3_dot(oc, oc) - radius * radius;
-  double discriminant = b*b - 4*a*c;
+  //double a = vec3_dot(r.dir, r.dir);
+  double a = vec3_length_squared(r.dir);
+  double h = vec3_dot(r.dir, oc);
+  double c = vec3_length_squared(oc) - radius * radius;
+  double discriminant = h*h - a*c;
 
   if (discriminant < 0) {
     return -1.0;
   } else {
-  
-    return (-b - sqrt(discriminant) / 2.0 * a);
+    return (h - sqrt(discriminant)) / a;
   }
 
 }
@@ -27,7 +27,7 @@ color ray_color(ray r) {
 
   if (t > 0.0) {
     vec3 N = unit_vector(vec3_sub(ray_at(r, t), (vec3){0, 0, -1}));
-    color out = vec3_scale(vec3_create(N.e[0] + 1, N.e[1] + 1, N.e[2] + 1), t);
+    color out = vec3_scale(vec3_create(N.e[0] + 1, N.e[1] + 1, N.e[2] + 1), 0.5);
     return out;
   }
 
