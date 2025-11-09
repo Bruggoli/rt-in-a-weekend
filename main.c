@@ -1,12 +1,37 @@
+#include <math.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "vec3.h"
 #include "color.h"
 #include "ray.h"
 
+double hit_sphere(point3 center, double radius, ray r) {
+  vec3 oc = vec3_sub(center,  r.orig);
+  double a = vec3_dot(r.dir, r.dir);
+  double b = -2.0 * vec3_dot(r.dir, oc);
+  double c = vec3_dot(oc, oc) - radius * radius;
+  double discriminant = b*b - 4*a*c;
+
+  if (discriminant < 0) {
+    return -1.0;
+  } else {
+  
+    return (-b - sqrt(discriminant) / 2.0 * a);
+  }
+
+}
+
 color ray_color(ray r) {
+  double t = hit_sphere(vec3_create(0, 0, -1), 0.5, r);
+
+  if (t > 0.0) {
+    vec3 N = unit_vector(vec3_sub(ray_at(r, t), (vec3){0, 0, -1}));
+    color out = vec3_scale(vec3_create(N.e[0] + 1, N.e[1] + 1, N.e[2] + 1), t);
+    return out;
+  }
+
   vec3 unit_direction = unit_vector(r.dir);
-  fprintf(stderr,"unit_direction: %f\n", unit_direction.e[1]);
   double a = 0.5 * (unit_direction.e[1] + 1.0);
   return 
     vec3_add(
@@ -20,7 +45,7 @@ int main() {
   // Image
 
   double aspect_ratio = 16.0 / 9.0;
-  int image_width = 400;
+  int image_width = 1200;
 
   // Calculate image height and ensure > 1
   int image_height = (int)(image_width / aspect_ratio);
