@@ -6,7 +6,7 @@
 #include "vec3.h"
 
 double  aspect_ratio      = 16.0 / 9.0;
-int     image_width       = 1200;
+int     image_width       = 400;
 int     samples_per_pixel = 10;
 
 
@@ -48,6 +48,7 @@ camera camera_initialize() {
   double viewport_height = 2.0;
   double viewport_width = viewport_height * (double)image_width/image_height;
   point3 camera_center = vec3_create(0, 0, 0);
+  c.center = camera_center;
 
   vec3 viewport_u = vec3_create(viewport_width, 0, 0);
   vec3 viewport_v = vec3_create(0, -viewport_height, 0);
@@ -95,7 +96,7 @@ ray camera_get_ray(camera* c, double i, double j) {
       vec3_scale(c->pixel_delta_v, (j + offset.e[1]))
       )
   );
-  return ray_create(c->center, vec3_sub(pixel_sample, offset));
+  return ray_create(c->center, vec3_sub(pixel_sample, c->center));
   
 }
 

@@ -11,8 +11,7 @@ typedef struct {
   point3 pixel00_loc, 
          center;
   vec3   pixel_delta_u, 
-         pixel_delta_v, 
-         camera_center;
+         pixel_delta_v;
   double aspect_ratio,
          pixel_samples_scale;
 } camera;
