@@ -6,8 +6,9 @@
 #include "vec3.h"
 
 double  aspect_ratio      = 16.0 / 9.0;
-int     image_width       = 400;
+int     image_width       = 1000;
 int     samples_per_pixel = 10;
+int     max_depth         = 10;
 
 
 void render(hittable* world) {
@@ -23,7 +24,7 @@ void render(hittable* world) {
       color pixel_color = vec3_create(0, 0, 0);
       for (int sample = 0; sample < samples_per_pixel; sample++) {
         ray r = camera_get_ray(&camera, i, j);
-        pixel_color = vec3_add(pixel_color, ray_color(r, world));
+        pixel_color = vec3_add(pixel_color, ray_color(r, max_depth, world));
       }
     write_color(stdout, vec3_scale( pixel_color, camera.pixel_samples_scale));
     }
@@ -69,12 +70,16 @@ camera camera_initialize() {
   return c;
 }
 
-color ray_color(ray r, hittable* world) {
+color ray_color(ray r, int depth, hittable* world) {
+
+  if (depth <= 0)
+    return vec3_create(0, 0, 0);
+
   hit_record rec;
 
-  if (world->hit(world, r, interval_create(0, INFINITY), &rec)) {
-    vec3 adjusted = vec3_add(rec.normal, vec3_create(1, 1, 1));
-    return vec3_scale(adjusted, 0.5);
+  if (world->hit(world, r, interval_create(0.001, INFINITY), &rec)) {
+    vec3 direction = vec3_add(rec.normal, vec3_random_unit_vector());
+    return vec3_scale(ray_color(ray_create(rec.p, direction), depth - 1, world), 0.9);
   }
 
   // Sky gradient

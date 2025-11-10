@@ -40,4 +40,13 @@ double vec3_length_squared(vec3 v);
 
 vec3 vec3_unit(vec3 v);
 
+vec3 vec3_random_unit_vector();
+
+vec3 vec3_random_on_hemisphere(vec3 normal);
+
+vec3 vec3_random();
+
+vec3 vec3_random_range(double min, double max);
+
+
 #endif

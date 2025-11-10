@@ -7,7 +7,8 @@
 typedef struct {
   int   image_height,
         image_width,
-        samples_per_pixel;
+        samples_per_pixel,
+        max_depth;
   point3 pixel00_loc, 
          center;
   vec3   pixel_delta_u, 
@@ -20,7 +21,7 @@ void render(hittable* world);
 
 camera camera_initialize();
 
-vec3 ray_color(ray r, hittable* world);
+vec3 ray_color(ray r, int max_depth, hittable* world);
 
 ray camera_get_ray(camera* c, double i, double j);
 

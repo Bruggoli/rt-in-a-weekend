@@ -1,4 +1,6 @@
 #include "vec3.h"
+#include "rtweekend.h"
+#include <math.h>
 
 
 // constructor
@@ -58,3 +60,29 @@ double vec3_length(vec3 v) {
 vec3 unit_vector(vec3 v) {
   return vec3_scale(v, 1.0 / vec3_length(v));
 }
+
+vec3 vec3_random_on_hemisphere(vec3 normal) {
+  vec3 on_unit_sphere = vec3_random_unit_vector();
+  if (vec3_dot(on_unit_sphere, normal))
+    return on_unit_sphere;
+  else
+   return vec3_negate(on_unit_sphere);
+}
+
+vec3 vec3_random_unit_vector() {
+  while(true) {
+    vec3 p = vec3_random_range(-1, 1);
+    double lensq = vec3_length_squared(p);
+    if (1e-160 < lensq && lensq <= 1)
+      return vec3_div(p, sqrt(lensq));
+  }
+}
+
+vec3 vec3_random() {
+  return vec3_create(random_double(), random_double(), random_double());
+}
+
+vec3 vec3_random_range(double min, double max) {
+  return vec3_create(random_double_range(min, max), random_double_range(min, max), random_double_range(min, max));
+}
+
