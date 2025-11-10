@@ -37,6 +37,10 @@ vec3 vec3_cross(vec3 u, vec3 v){
   );
 }
 
+vec3 vec3_negate(vec3 v) {
+  return vec3_create(-v.e[0],-v.e[1],-v.e[2]);
+}
+
 double vec3_dot(vec3 u, vec3 v) {
   return  u.e[0] * v.e[0] + 
           u.e[1] * v.e[1] +

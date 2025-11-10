@@ -1,14 +1,12 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdbool.h>
-
+#include "hittable.h"
+#include "rtweekend.h"
+#include "hittable_list.h"
+#include "sphere.h"
 #include "vec3.h"
-#include "color.h"
-#include "ray.h"
+#include <math.h>
 
 double hit_sphere(point3 center, double radius, ray r) {
   vec3 oc = vec3_sub(center,  r.orig);
-  //double a = vec3_dot(r.dir, r.dir);
   double a = vec3_length_squared(r.dir);
   double h = vec3_dot(r.dir, oc);
   double c = vec3_length_squared(oc) - radius * radius;
@@ -22,15 +20,15 @@ double hit_sphere(point3 center, double radius, ray r) {
 
 }
 
-color ray_color(ray r) {
-  double t = hit_sphere(vec3_create(0, 0, -1), 0.5, r);
+color ray_color(ray r, hittable* world) {
+  hit_record rec;
 
-  if (t > 0.0) {
-    vec3 N = unit_vector(vec3_sub(ray_at(r, t), (vec3){0, 0, -1}));
-    color out = vec3_scale(vec3_create(N.e[0] + 1, N.e[1] + 1, N.e[2] + 1), 0.5);
-    return out;
+  if (world->hit(world, r, 0, INFINITY, &rec)) {
+    vec3 adjusted = vec3_add(rec.normal, vec3_create(1, 1, 1));
+    return vec3_scale(adjusted, 0.5);
   }
 
+  // Sky gradient
   vec3 unit_direction = unit_vector(r.dir);
   double a = 0.5 * (unit_direction.e[1] + 1.0);
   return 
@@ -50,6 +48,15 @@ int main() {
   // Calculate image height and ensure > 1
   int image_height = (int)(image_width / aspect_ratio);
   image_height = (image_height < 1) ? 1 : image_height;
+
+  // World
+  
+  hittable* world = hittable_list_create();
+
+  hittable_list_add(world, sphere_create(vec3_create(0, 0, -1), 0.5));
+  hittable_list_add(world, sphere_create(vec3_create(0, -100.5, -1), 100));
+
+
 
   // Camera
 
@@ -87,7 +94,7 @@ int main() {
       vec3 ray_direction = vec3_sub(pixel_center, camera_center);
       ray ray = ray_create(camera_center, ray_direction);
 
-      color pixel_color = ray_color(ray);
+      color pixel_color = ray_color(ray, world);
       write_color(stdout, pixel_color);
     }
   }

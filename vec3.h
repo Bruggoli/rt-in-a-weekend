@@ -28,6 +28,8 @@ vec3 vec3_div(vec3 u, double t);
 
 vec3 vec3_cross(vec3 u, vec3 v);
 
+vec3 vec3_negate(vec3 v);
+
 vec3 unit_vector(vec3 v);
 
 double vec3_dot(vec3 u, vec3 v);
