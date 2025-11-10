@@ -9,7 +9,7 @@
 // forward declaration
 // needs to be declared here before its used in the "constructor" and the 
 // args arent applicable to every other shape i might implement
-bool sphere_hit(hittable* self, ray r, double ray_tmin, double ray_tmax, hit_record* rec);
+bool sphere_hit(hittable* self, ray r, interval ray_t, hit_record* rec);
 
 
 hittable* sphere_create(point3 center, double radius){
@@ -25,7 +25,7 @@ hittable* sphere_create(point3 center, double radius){
   return h;
 };
 
-bool sphere_hit(hittable* self, ray r, double ray_tmin, double ray_tmax, hit_record* rec) {
+bool sphere_hit(hittable* self, ray r, interval ray_t, hit_record* rec) {
   sphere* s = (sphere*)self->data;
   vec3 oc = vec3_sub(s->center, r.orig);
   double a = vec3_length_squared(r.dir);
@@ -41,9 +41,9 @@ bool sphere_hit(hittable* self, ray r, double ray_tmin, double ray_tmax, hit_rec
   }
 
   double root = (h - sqrtd) / a;
-  if (root <= ray_tmin || ray_tmax <= root) {
+  if (root <= ray_t.min || ray_t.max <= root) {
     root = (h + sqrtd) / a;
-    if (root <= ray_tmin || ray_tmax <= root){
+    if (root <= ray_t.min || ray_t.max <= root){
       return false;
     }
   }

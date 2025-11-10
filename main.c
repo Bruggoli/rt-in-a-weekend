@@ -1,4 +1,5 @@
 #include "hittable.h"
+#include "interval.h"
 #include "rtweekend.h"
 #include "hittable_list.h"
 #include "sphere.h"
@@ -23,7 +24,7 @@ double hit_sphere(point3 center, double radius, ray r) {
 color ray_color(ray r, hittable* world) {
   hit_record rec;
 
-  if (world->hit(world, r, 0, INFINITY, &rec)) {
+  if (world->hit(world, r, interval_create(0, INFINITY), &rec)) {
     vec3 adjusted = vec3_add(rec.normal, vec3_create(1, 1, 1));
     return vec3_scale(adjusted, 0.5);
   }

@@ -1,5 +1,6 @@
 #include "hittable_list.h"
 #include "hittable.h"
+#include "rtweekend.h"
 
 #include <stdlib.h>
 
@@ -38,17 +39,17 @@ void hittable_list_clear(hittable_list *list) {
   list->count = 0;
 }
 
-bool hittable_list_hit(hittable* self, ray r, double ray_tmin, double ray_tmax, hit_record *rec) {
+bool hittable_list_hit(hittable* self, ray r, interval ray_t, hit_record *rec) {
   // data is a void pointer
   // this means the compiler doesnt know what data is
   // for the compiler to understand we have to type-cast it
   hittable_list* list = (hittable_list*)self->data;
   hit_record temp_rec;
   bool hit_anything = false;
-  double closests_so_far = ray_tmax;
+  double closests_so_far = ray_t.max;
 
   for (int i = 0; i < list->count; i++) {
-    if (list->objects[i]->hit(list->objects[i], r, ray_tmin, closests_so_far, &temp_rec)) {
+    if (list->objects[i]->hit(list->objects[i], r, interval_create(ray_t.min, closests_so_far), &temp_rec)) {
       hit_anything = true;
       closests_so_far = temp_rec.t;
       *rec = temp_rec;
