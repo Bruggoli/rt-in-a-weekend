@@ -8,9 +8,10 @@
 typedef struct {
   point3 center;
   double radius;
+  material* mat;
 } sphere;
 
-hittable* sphere_create(point3 center, double radius);
+hittable* sphere_create(point3 center, double radius, material* mat);
 void sphere_destroy(hittable* h);
 
 #endif

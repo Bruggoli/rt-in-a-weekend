@@ -1,6 +1,7 @@
 #include "vec3.h"
 #include "rtweekend.h"
 #include <math.h>
+#include <stdbool.h>
 
 
 // constructor
@@ -76,6 +77,11 @@ vec3 vec3_random_unit_vector() {
     if (1e-160 < lensq && lensq <= 1)
       return vec3_div(p, sqrt(lensq));
   }
+}
+
+bool near_zero(vec3 v) {
+  double s = 1e-8;
+  return (fabs(v.e[0]) < s) && (fabs(v.e[1]) < s) && (fabs(v.e[2]) < s);
 }
 
 vec3 vec3_random() {

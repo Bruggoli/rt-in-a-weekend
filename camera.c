@@ -7,7 +7,7 @@
 
 double  aspect_ratio      = 16.0 / 9.0;
 int     image_width       = 1000;
-int     samples_per_pixel = 10;
+int     samples_per_pixel = 50;
 int     max_depth         = 10;
 
 

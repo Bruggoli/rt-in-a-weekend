@@ -6,11 +6,15 @@
 #include "interval.h"
 #include <stdbool.h>
 
+// forward declaration to prevent recursive include calls
+typedef struct material material;
+
 typedef struct hit_record {
   point3 p;
   vec3 normal;
   double t;
   bool front_face;
+  material* mat;
 
 } hit_record;
 

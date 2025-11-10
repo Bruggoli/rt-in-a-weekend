@@ -1,6 +1,7 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include <stdbool.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -43,6 +44,8 @@ vec3 vec3_unit(vec3 v);
 vec3 vec3_random_unit_vector();
 
 vec3 vec3_random_on_hemisphere(vec3 normal);
+
+bool near_zero(vec3 v);
 
 vec3 vec3_random();
 
