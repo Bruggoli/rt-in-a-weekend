@@ -5,13 +5,16 @@
 #include "vec3.h"
 
 typedef struct {
-  int   image_height, 
-        image_width;
-  vec3 pixel00_loc, 
-       pixel_delta_u, 
-       pixel_delta_v, 
-       camera_center;
-  double aspect_ratio;
+  int   image_height,
+        image_width,
+        samples_per_pixel;
+  point3 pixel00_loc, 
+         center;
+  vec3   pixel_delta_u, 
+         pixel_delta_v, 
+         camera_center;
+  double aspect_ratio,
+         pixel_samples_scale;
 } camera;
 
 void render(hittable* world);
@@ -19,5 +22,9 @@ void render(hittable* world);
 camera camera_initialize();
 
 vec3 ray_color(ray r, hittable* world);
+
+ray camera_get_ray(camera* c, double i, double j);
+
+vec3 ray_sample_square();
 
 #endif

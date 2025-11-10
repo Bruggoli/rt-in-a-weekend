@@ -1,9 +1,13 @@
 #include "camera.h"
 #include "hittable.h"
 #include "color.h"
+#include "ray.h"
+#include "rtweekend.h"
+#include "vec3.h"
 
-double  aspect_ratio  = 16.0 / 9.0;
-int     image_width   = 1200;
+double  aspect_ratio      = 16.0 / 9.0;
+int     image_width       = 1200;
+int     samples_per_pixel = 10;
 
 
 void render(hittable* world) {
@@ -16,16 +20,12 @@ void render(hittable* world) {
     fprintf(stderr, "\rScanlines remaining: %d", (camera.image_height - j));
     fflush(stderr);
     for (int i = 0; i < image_width; i++) {
-
-      point3 pixel_center = vec3_add(
-                              vec3_add(camera.pixel00_loc, vec3_scale(camera.pixel_delta_u, i)), 
-                              vec3_scale(camera.pixel_delta_v, j));
-
-      vec3 ray_direction = vec3_sub(pixel_center, camera.camera_center);
-      ray ray = ray_create(camera.camera_center, ray_direction);
-
-      color pixel_color = ray_color(ray, world);
-      write_color(stdout, pixel_color);
+      color pixel_color = vec3_create(0, 0, 0);
+      for (int sample = 0; sample < samples_per_pixel; sample++) {
+        ray r = camera_get_ray(&camera, i, j);
+        pixel_color = vec3_add(pixel_color, ray_color(r, world));
+      }
+    write_color(stdout, vec3_scale( pixel_color, camera.pixel_samples_scale));
     }
   }
 
@@ -42,6 +42,7 @@ camera camera_initialize() {
   int image_height = (int)(image_width / aspect_ratio);
   c.image_height = (image_height < 1) ? 1 : image_height;
 
+  c.pixel_samples_scale = 1.0 / samples_per_pixel;
 
   double focal_length = 1.0;
   double viewport_height = 2.0;
@@ -83,4 +84,21 @@ color ray_color(ray r, hittable* world) {
       vec3_scale(vec3_create(1.0, 1.0, 1.0), (1.0-a)), 
       vec3_scale(vec3_create(0.5, 0.7, 1.0), a)
     );
+}
+
+ray camera_get_ray(camera* c, double i, double j) {
+  vec3 offset = ray_sample_square();
+  vec3 pixel_sample = vec3_add(
+    c->pixel00_loc, 
+    vec3_add(
+      vec3_scale(c->pixel_delta_u, (i + offset.e[0])),
+      vec3_scale(c->pixel_delta_v, (j + offset.e[1]))
+      )
+  );
+  return ray_create(c->center, vec3_sub(pixel_sample, offset));
+  
+}
+
+vec3 ray_sample_square() {
+  return vec3_create(random_double() - 0.5, random_double() - 0.5, 0);
 }
