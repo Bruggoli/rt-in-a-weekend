@@ -49,6 +49,9 @@ bool near_zero(vec3 v);
 
 vec3 reflect(vec3 v, vec3 n);
 
+vec3 refract(vec3 uv, vec3 n, double etai_over_etat);
+
+
 vec3 vec3_random();
 
 vec3 vec3_random_range(double min, double max);

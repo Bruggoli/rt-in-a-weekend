@@ -76,6 +76,22 @@ vec3 reflect(vec3 v, vec3 n){
   return vec3_sub(v, scaled_n);
 }
 
+vec3 refract(vec3 uv, vec3 n, double etai_over_etat) {
+  double cos_theta = fmin(
+    vec3_dot(
+      vec3_negate(uv), 
+      n), 
+    1.0);
+  vec3 r_out_perp = vec3_scale(
+    vec3_add(
+      uv, 
+      vec3_scale(n, cos_theta)), 
+      etai_over_etat);
+
+  vec3 r_out_parallel = vec3_scale(n, -sqrt(fabs(1.0 - vec3_length_squared(r_out_perp))));
+  return vec3_add(r_out_perp, r_out_parallel);
+}
+
 vec3 vec3_random_unit_vector() {
   while(true) {
     vec3 p = vec3_random_range(-1, 1);

@@ -8,6 +8,8 @@
 #include "lambertian.h"
 #include "vec3.h"
 #include "camera.h"
+#include "dielectric.h"
+
 
 int main() {
   
@@ -15,12 +17,14 @@ int main() {
 
   material* material_ground = mat_lambertian(vec3_create(0.8, 0.8, 0.0));
   material* material_center = mat_lambertian(vec3_create(0.1, 0.2, 0.5));
-  material* material_left = mat_metal(vec3_create(0.8, 0.8, 0.8), 0.3);
+  material* material_left = mat_dielectric(1.00 / 1.30);
+  material* material_bubble = mat_dielectric(150);
   material* material_right = mat_metal(vec3_create(0.8, 0.6, 0.2), 1.0);
 
   hittable_list_add(world, sphere_create(vec3_create( 0.0,-100.5, -1.0), 100, material_ground));
   hittable_list_add(world, sphere_create(vec3_create( 0.0,   0.0, -1.2), 0.5, material_center));
   hittable_list_add(world, sphere_create(vec3_create(-1.0,   0.0, -1.0), 0.5, material_left));
+  hittable_list_add(world, sphere_create(vec3_create(-1.0,   0.0, -1.0), 0.5, material_bubble));
   hittable_list_add(world, sphere_create(vec3_create( 1.0,   0.0, -1.0), 0.5, material_right));
 
   camera cam;
@@ -30,6 +34,10 @@ int main() {
   cam.samples_per_pixel = 500;
   cam.max_depth         = 50;
 
+  cam.vfov = 90;
+  cam.lookfrom = vec3_create(-2,2,1);
+  cam.lookat   = vec3_create(0,0,-1);
+  cam.vup      = vec3_create(0,1,0);
   render(world);
 
   if (open_file("./image.ppm") == 1) {

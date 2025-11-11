@@ -11,6 +11,11 @@ int     image_width       = 400;
 int     samples_per_pixel = 10;
 int     max_depth         = 10;
 
+double  vfov              = 90;
+point3  lookfrom          = (vec3){0, 0, 0};
+point3  lookat            = (vec3){0, 0, -1};
+point3  vup               = (vec3){0, 1, 0};
+
 
 void render(hittable* world) {
   
@@ -31,6 +36,7 @@ void render(hittable* world) {
     }
   }
 
+  fprintf(stderr, "\r                                \n");
   fprintf(stderr, "\rDone.\n");
 }
 
@@ -46,14 +52,23 @@ camera camera_initialize() {
 
   c.pixel_samples_scale = 1.0 / samples_per_pixel;
 
-  double focal_length = 1.0;
-  double viewport_height = 2.0;
+  c.center = c.lookfrom;
+  
+  // Determine viewport dimensions.
+  double focal_length = vec3_length(vec3_sub(c.lookfrom, c.lookat));
+  double theta = degrees_to_radians(vfov);
+  double h = tan(theta / 2);
+  double viewport_height = 2.0 * h * focal_length;
   double viewport_width = viewport_height * (double)image_width/image_height;
   point3 camera_center = vec3_create(0, 0, 0);
-  c.center = camera_center;
 
-  vec3 viewport_u = vec3_create(viewport_width, 0, 0);
-  vec3 viewport_v = vec3_create(0, -viewport_height, 0);
+  // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
+  c.w = unit_vector(vec3_sub(c.lookfrom, c.lookat));
+  c.u = unit_vector(vec3_cross(c.vup, c.w));
+  c.v = vec3_cross(c.w, c.u);
+
+  vec3 viewport_u = vec3_scale(c.u, viewport_width);
+  vec3 viewport_v = vec3_scale(vec3_negate(c.v), viewport_height);
 
   c.pixel_delta_u = vec3_div(viewport_u, image_width); 
   c.pixel_delta_v = vec3_div(viewport_v, image_height);
@@ -63,7 +78,12 @@ camera camera_initialize() {
   vec3 upper_left_calc_1= vec3_sub(camera_center, vec3_create(0, 0, focal_length));
   // temp calc 2
   vec3 upper_left_calc_2 = vec3_add(vec3_div(viewport_u, 2), vec3_div(viewport_v, 2));
-  point3 viewport_upper_left = vec3_sub(upper_left_calc_1, upper_left_calc_2);
+
+  // auto viewport_upper_left = center - (focal_length * w) - viewport_u/2 - viewport_v/2;
+  point3 p0 = vec3_sub(c.center, vec3_scale(c.w, focal_length));
+  p0 = vec3_sub(p0, vec3_div(viewport_u, 2.0));
+  p0 = vec3_sub(p0, vec3_div(viewport_u, 2.0));
+  point3 viewport_upper_left = p0;
 
   vec3 pixel_delta_scaled = vec3_scale(vec3_add(c.pixel_delta_u, c.pixel_delta_v), 0.5);
   c.pixel00_loc = vec3_add(viewport_upper_left, pixel_delta_scaled);

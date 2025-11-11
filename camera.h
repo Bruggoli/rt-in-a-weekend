@@ -5,16 +5,21 @@
 #include "vec3.h"
 
 typedef struct {
-  int   image_height,
-        image_width,
-        samples_per_pixel,
-        max_depth;
-  point3 pixel00_loc, 
-         center;
-  vec3   pixel_delta_u, 
-         pixel_delta_v;
-  double aspect_ratio,
-         pixel_samples_scale;
+  int   image_height,           // rendered image height
+        image_width,            // rendered image width
+        samples_per_pixel,      // count of random samples per pixel
+        max_depth;              // Max number of ray bounces into scene
+  point3  pixel00_loc,          // location of pixel at 0, 0
+          center,               // camera center
+          lookfrom,             // where camera is placed in scene
+          lookat;               // what the camera is looking at
+  vec3  pixel_delta_u,        // offset to pixel to the right
+        pixel_delta_v,        // offset to pixel below
+        vup,                  // camera relative "up" direction
+        u, v, w;              // camera frame basis vectors
+  double  aspect_ratio,         // ratio of image width over height
+          pixel_samples_scale,  // color scale factor for a sum of pixel samples (anti-aliasing)
+          vfov;                 // vertical FOV of camera
 } camera;
 
 void render(hittable* world);

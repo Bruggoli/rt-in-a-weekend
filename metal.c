@@ -5,7 +5,7 @@
 #include "vec3.h"
 #include <stdlib.h>
 
-bool metal_scatter(material* self, ray r_in, hit_record*, color* attenuation, ray* scattered);
+bool metal_scatter(material* self, ray r_in, hit_record* rec, color* attenuation, ray* scattered);
 
 material* mat_metal(color albedo, double fuzz) {
   material* m = malloc(sizeof(material));
