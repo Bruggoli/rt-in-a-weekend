@@ -16,10 +16,14 @@ typedef struct {
   vec3  pixel_delta_u,        // offset to pixel to the right
         pixel_delta_v,        // offset to pixel below
         vup,                  // camera relative "up" direction
-        u, v, w;              // camera frame basis vectors
+        u, v, w,              // camera frame basis vectors
+        defocus_disk_u,       // Defocus disk horizontal radius
+        defocus_disk_v;       // Defocus disk vertical radius
   double  aspect_ratio,         // ratio of image width over height
           pixel_samples_scale,  // color scale factor for a sum of pixel samples (anti-aliasing)
-          vfov;                 // vertical FOV of camera
+          vfov,                 // vertical FOV of camera
+          defocus_angle,  // Variation angle of rays through each pixel
+          focus_dist;     // Distance from camera lookfrom point to plane of perfect focus
 } camera;
 
 void render(hittable* world, camera cam);

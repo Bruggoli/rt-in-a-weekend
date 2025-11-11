@@ -41,7 +41,11 @@ double vec3_length_squared(vec3 v);
 
 vec3 vec3_unit(vec3 v);
 
+vec3 random_in_unit_disk();
+
 vec3 vec3_random_unit_vector();
+
+vec3 defocus_disk();
 
 vec3 vec3_random_on_hemisphere(vec3 normal);
 

@@ -62,6 +62,14 @@ vec3 unit_vector(vec3 v) {
   return vec3_scale(v, 1.0 / vec3_length(v));
 }
 
+vec3 random_in_unit_disk() {
+  while (true){
+    vec3 p = vec3_create(random_double_range(-1, 1), random_double(), 0);
+    if (vec3_length(p) < 1)
+      return p;
+  }
+}
+
 vec3 vec3_random_on_hemisphere(vec3 normal) {
   vec3 on_unit_sphere = vec3_random_unit_vector();
   if (vec3_dot(on_unit_sphere, normal))
