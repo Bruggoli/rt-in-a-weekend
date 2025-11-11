@@ -22,9 +22,9 @@ typedef struct {
           vfov;                 // vertical FOV of camera
 } camera;
 
-void render(hittable* world);
+void render(hittable* world, camera cam);
 
-camera camera_initialize();
+void camera_initialize(camera* cam);
 
 vec3 ray_color(ray r, int max_depth, hittable* world);
 
@@ -32,4 +32,5 @@ ray camera_get_ray(camera* c, double i, double j);
 
 vec3 ray_sample_square();
 
+void camera_diagnostics(camera* c);
 #endif

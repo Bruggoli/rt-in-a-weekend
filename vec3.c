@@ -115,6 +115,6 @@ vec3 vec3_random_range(double min, double max) {
 }
 
 void vec3_print(FILE* out, vec3 v) {
-    fprintf(out, "%f %f %f\n", v.e[0], v.e[1], v.e[2]);
+    fprintf(out, "x: %f y: %f z: %f\n", v.e[0], v.e[1], v.e[2]);
 }
 

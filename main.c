@@ -27,18 +27,22 @@ int main() {
   hittable_list_add(world, sphere_create(vec3_create(-1.0,   0.0, -1.0), 0.5, material_bubble));
   hittable_list_add(world, sphere_create(vec3_create( 1.0,   0.0, -1.0), 0.5, material_right));
 
-  camera cam;
 
+  camera cam;
   cam.aspect_ratio      = 16.0 / 9.0;
   cam.image_width       = 400;
   cam.samples_per_pixel = 500;
   cam.max_depth         = 50;
+  cam.vfov              = 90;
 
-  cam.vfov = 90;
   cam.lookfrom = vec3_create(-2,2,1);
   cam.lookat   = vec3_create(0,0,-1);
   cam.vup      = vec3_create(0,1,0);
-  render(world);
+
+  camera_diagnostics(&cam);
+
+  camera_initialize(&cam);
+  render(world, cam);
 
   if (open_file("./image.ppm") == 1) {
     fprintf(stderr, "Could not find picture in path");
