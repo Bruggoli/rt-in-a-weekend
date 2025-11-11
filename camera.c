@@ -23,25 +23,21 @@ point3  lookat            = (vec3){0, 0,-1};
 point3  vup               = (vec3){0, 1, 0};
 
 
-void render(hittable* world, camera cam) {
+void render(hittable* world, camera* cam) {
   
-  camera camera = cam;
-  
-  printf("P3\n%d %d\n255\n", image_width, camera.image_height);
-
-  for (int j = 0; j < camera.image_height; j++) {
-    fprintf(stderr, "\rScanlines remaining: %d", (camera.image_height - j));
+  printf("P3\n%d %d\n255\n", cam->image_width, cam->image_height);
+  for (int j = 0; j < cam->image_height; j++) {
+    fprintf(stderr, "\rScanlines remaining: %d", (cam->image_height - j));
     fflush(stderr);
-    for (int i = 0; i < image_width; i++) {
+    for (int i = 0; i < cam->image_width; i++) {
       color pixel_color = vec3_create(0, 0, 0);
-      for (int sample = 0; sample < samples_per_pixel; sample++) {
-        ray r = camera_get_ray(&camera, i, j);
-        pixel_color = vec3_add(pixel_color, ray_color(r, max_depth, world));
+      for (int sample = 0; sample < cam->samples_per_pixel; sample++) {
+        ray r = camera_get_ray(cam, i, j);
+        pixel_color = vec3_add(pixel_color, ray_color(r, cam->max_depth, world));
       }
-    write_color(stdout, vec3_scale( pixel_color, camera.pixel_samples_scale));
+    write_color(stdout, vec3_scale( pixel_color, cam->pixel_samples_scale));
     }
   }
-
   fprintf(stderr, "\r                                \n");
   fprintf(stderr, "\rDone.\n");
 }
@@ -69,7 +65,7 @@ void camera_initialize(camera* c) {
   c->v = vec3_cross(c->w, c->u);
   vec3 viewport_u = vec3_scale(c->u, viewport_width);
   vec3 viewport_v = vec3_scale(vec3_negate(c->v), viewport_height);
-  c->pixel_delta_u = vec3_div(viewport_u, image_width); 
+  c->pixel_delta_u = vec3_div(viewport_u, c->image_width); 
   c->pixel_delta_v = vec3_div(viewport_v, image_height);
   
   // auto viewport_upper_left = center - (focal_length * w) - viewport_u/2 - viewport_v/2;
@@ -150,9 +146,9 @@ vec3 ray_sample_square() {
 void camera_diagnostics(camera* c) {
   fprintf(stderr, "\nImage dimensions:\nWidth: %d\tHeight: %d", c->image_width, c->image_height);
   fprintf(stderr, "\nCamera coordinates:\nLookfrom:\t");
-  vec3_print(stderr, lookfrom);
+  vec3_print(stderr, c->lookfrom);
   fprintf(stderr, "Lookat:\t\t");
-  vec3_print(stderr, lookat);
+  vec3_print(stderr, c->lookat);
   fprintf(stderr, "vup:\t\t");
-  vec3_print(stderr, vup);
+  vec3_print(stderr, c->vup);
 }

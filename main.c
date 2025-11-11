@@ -71,7 +71,7 @@ int main() {
   camera_diagnostics(&cam);
 
   camera_initialize(&cam);
-  render(world, cam);  
+  render(world, &cam);  
   if (open_file("./image.ppm") == 1) {
     fprintf(stderr, "Could not find picture in path");
   }

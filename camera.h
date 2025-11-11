@@ -26,7 +26,7 @@ typedef struct {
           focus_dist;     // Distance from camera lookfrom point to plane of perfect focus
 } camera;
 
-void render(hittable* world, camera cam);
+void render(hittable* world, camera* cam);
 
 void camera_initialize(camera* cam);
 
