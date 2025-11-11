@@ -1,6 +1,7 @@
 #include "hittable.h"
 #include "hittable_list.h"
 #include "lambertian.h"
+#include "open_rendered_image.h"
 #include "sphere.h"
 #include "material.h"
 #include "metal.h"
@@ -23,6 +24,7 @@ int main() {
   hittable_list_add(world, sphere_create(vec3_create( 1.0,   0.0, -1.0), 0.5, material_right));
 
   camera cam;
+
   cam.aspect_ratio      = 16.0 / 9.0;
   cam.image_width       = 400;
   cam.samples_per_pixel = 500;
@@ -30,4 +32,7 @@ int main() {
 
   render(world);
 
+  if (open_file("./image.ppm") == 1) {
+    fprintf(stderr, "Could not find picture in path");
+  }
 }

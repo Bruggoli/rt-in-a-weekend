@@ -71,9 +71,9 @@ vec3 vec3_random_on_hemisphere(vec3 normal) {
 }
 
 vec3 reflect(vec3 v, vec3 n){
-  double dot_vn = 2 * vec3_dot(v, n);
-  vec3 scaled_vn = vec3_scale(n, dot_vn);
-  return vec3_sub(v, scaled_vn);
+  double dot_vn = vec3_dot(v, n);
+  vec3 scaled_n = vec3_scale(n, 2.0 * dot_vn);
+  return vec3_sub(v, scaled_n);
 }
 
 vec3 vec3_random_unit_vector() {
