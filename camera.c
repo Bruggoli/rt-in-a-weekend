@@ -46,16 +46,19 @@ void render(hittable* world, camera* cam) {
 void camera_initialize(camera* c) {
 
   // Calculate image height and ensure > 1
+  fprintf(stderr, "%d\n", c->image_height);
+  fprintf(stderr, "%d\n", c->image_width);
   int image_height = (int)(c->image_width / c->aspect_ratio);
   c->image_height = (image_height < 1) ? 1 : image_height;
   c->pixel_samples_scale = 1.0 / c->samples_per_pixel;
   c->center = c->lookfrom;
-  
+  fprintf(stderr, "%d\n", c->image_height);
+  fprintf(stderr, "%d\n", c->image_width);
   // Determine viewport dimensions.
   double focal_length = vec3_length(vec3_sub(c->lookfrom, c->lookat));
   double theta = degrees_to_radians(c->vfov);  // <-- c->vfov
   double h = tan(theta / 2);
-  double viewport_height = 2.0 * h * focal_length;
+  double viewport_height = 2.0 * h * c->focus_dist;
   double viewport_width = viewport_height * (double)c->image_width / c->image_height;  // <-- c->image_width
   point3 camera_center = c->center;
 
@@ -66,7 +69,7 @@ void camera_initialize(camera* c) {
   vec3 viewport_u = vec3_scale(c->u, viewport_width);
   vec3 viewport_v = vec3_scale(vec3_negate(c->v), viewport_height);
   c->pixel_delta_u = vec3_div(viewport_u, c->image_width); 
-  c->pixel_delta_v = vec3_div(viewport_v, image_height);
+  c->pixel_delta_v = vec3_div(viewport_v, c->image_height);
   
   // auto viewport_upper_left = center - (focal_length * w) - viewport_u/2 - viewport_v/2;
   point3 p0 = vec3_sub(c->center, vec3_scale(c->w, focus_dist));
@@ -87,6 +90,7 @@ void camera_initialize(camera* c) {
   double defocus_radius = focus_dist * tan(degrees_to_radians(defocus_angle / 2));
   c->defocus_disk_u = vec3_scale(c->u, defocus_radius);
   c->defocus_disk_v = vec3_scale(c->v, defocus_radius);
+  fprintf(stderr, "Camera initialised!");
 
 }
 
