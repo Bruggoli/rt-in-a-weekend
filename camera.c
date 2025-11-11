@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "material.h"
 #include "hittable.h"
 #include "color.h"
 #include "ray.h"
@@ -6,8 +7,8 @@
 #include "vec3.h"
 
 double  aspect_ratio      = 16.0 / 9.0;
-int     image_width       = 1000;
-int     samples_per_pixel = 50;
+int     image_width       = 400;
+int     samples_per_pixel = 10;
 int     max_depth         = 10;
 
 
@@ -71,16 +72,20 @@ camera camera_initialize() {
 }
 
 color ray_color(ray r, int depth, hittable* world) {
-
   if (depth <= 0)
     return vec3_create(0, 0, 0);
 
   hit_record rec;
 
   if (world->hit(world, r, interval_create(0.001, INFINITY), &rec)) {
-    vec3 direction = vec3_add(rec.normal, vec3_random_unit_vector());
-    return vec3_scale(ray_color(ray_create(rec.p, direction), depth - 1, world), 0.9);
+    ray scattered;
+    color attenuation;
+    if (rec.mat->scatter(rec.mat, r, &rec, &attenuation, &scattered)){
+      return vec3_mul(attenuation, ray_color(scattered, depth - 1, world));
+    }
+    return vec3_create(0, 0, 0);
   }
+  
 
   // Sky gradient
   vec3 unit_direction = unit_vector(r.dir);

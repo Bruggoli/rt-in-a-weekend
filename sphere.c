@@ -18,7 +18,7 @@ hittable* sphere_create(point3 center, double radius, material* mat) {
   sphere* s = malloc(sizeof(sphere));
 
   s->center = center;
-  s->radius = radius;
+  s->radius = fmax(0, radius);
   s->mat    = mat;
 
   h->data = s;

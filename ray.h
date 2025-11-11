@@ -12,5 +12,6 @@ ray ray_create(point3 origin, vec3 direction);
 point3 ray_origin(ray r);
 vec3 ray_direction(ray r);
 point3 ray_at(ray r, double t);
+void ray_print(FILE* out, ray r);
 
 #endif

@@ -70,6 +70,12 @@ vec3 vec3_random_on_hemisphere(vec3 normal) {
    return vec3_negate(on_unit_sphere);
 }
 
+vec3 reflect(vec3 v, vec3 n){
+  double dot_vn = 2 * vec3_dot(v, n);
+  vec3 scaled_vn = vec3_scale(n, dot_vn);
+  return vec3_sub(v, scaled_vn);
+}
+
 vec3 vec3_random_unit_vector() {
   while(true) {
     vec3 p = vec3_random_range(-1, 1);
@@ -90,5 +96,9 @@ vec3 vec3_random() {
 
 vec3 vec3_random_range(double min, double max) {
   return vec3_create(random_double_range(min, max), random_double_range(min, max), random_double_range(min, max));
+}
+
+void vec3_print(FILE* out, vec3 v) {
+    fprintf(out, "%f %f %f\n", v.e[0], v.e[1], v.e[2]);
 }
 

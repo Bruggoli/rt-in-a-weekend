@@ -47,9 +47,14 @@ vec3 vec3_random_on_hemisphere(vec3 normal);
 
 bool near_zero(vec3 v);
 
+vec3 reflect(vec3 v, vec3 n);
+
 vec3 vec3_random();
 
 vec3 vec3_random_range(double min, double max);
+
+void vec3_print(FILE* out, vec3 v);
+
 
 
 #endif
