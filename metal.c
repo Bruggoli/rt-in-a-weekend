@@ -7,10 +7,11 @@
 
 bool metal_scatter(material* self, ray r_in, hit_record*, color* attenuation, ray* scattered);
 
-material* mat_metal(color albedo) {
+material* mat_metal(color albedo, double fuzz) {
   material* m = malloc(sizeof(material));
   metal* met = malloc(sizeof(metal));
   met->albedo = albedo;
+  met->fuzz = fuzz;
 
   m->data = met;
   m->scatter = metal_scatter;
@@ -20,12 +21,10 @@ material* mat_metal(color albedo) {
 
 
 bool metal_scatter(material* self, ray r_in, hit_record* rec, color* attenuation, ray* scattered) {
-  fprintf(stderr, "Before reflect: ");
   vec3 reflected = reflect(r_in.dir, rec->normal);
-  fprintf(stderr, "After reflect: ");
-  vec3_print(stderr, reflected);
-  *scattered = ray_create(rec->p, reflected);
   metal* m = (metal*)self->data;
+  reflected = vec3_add(unit_vector(reflected), vec3_scale(vec3_random_unit_vector(), m->fuzz));
+  *scattered = ray_create(rec->p, reflected);
   *attenuation = m->albedo;
   return true;
 }

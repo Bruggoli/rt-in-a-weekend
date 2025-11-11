@@ -6,8 +6,9 @@
 
 typedef struct {
   color albedo;
+  double fuzz;
 } metal;
 
-material* mat_metal(color albedo);
+material* mat_metal(color albedo, double fuzz);
 
 #endif

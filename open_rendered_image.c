@@ -5,5 +5,5 @@
 int open_file(char *path) {
   char cmd[256];
   snprintf(cmd, sizeof(cmd), "xdg-open %s", path);
-  return system(cmd) == 0;
+  return system(cmd) == 1;
 }

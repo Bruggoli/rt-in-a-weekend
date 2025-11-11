@@ -15,8 +15,8 @@ int main() {
 
   material* material_ground = mat_lambertian(vec3_create(0.8, 0.8, 0.0));
   material* material_center = mat_lambertian(vec3_create(0.1, 0.2, 0.5));
-  material* material_left = mat_metal(vec3_create(0.8, 0.8, 0.8));
-  material* material_right = mat_metal(vec3_create(0.8, 0.6, 0.2));
+  material* material_left = mat_metal(vec3_create(0.8, 0.8, 0.8), 0.3);
+  material* material_right = mat_metal(vec3_create(0.8, 0.6, 0.2), 1.0);
 
   hittable_list_add(world, sphere_create(vec3_create( 0.0,-100.5, -1.0), 100, material_ground));
   hittable_list_add(world, sphere_create(vec3_create( 0.0,   0.0, -1.2), 0.5, material_center));
