@@ -27,7 +27,7 @@ void render(hittable* world, camera* cam) {
   
   printf("P3\n%d %d\n255\n", cam->image_width, cam->image_height);
   for (int j = 0; j < cam->image_height; j++) {
-    fprintf(stderr, "\rScanlines remaining: %d", (cam->image_height - j));
+    fprintf(stderr, "\rScanlines remaining: %d/%d", (cam->image_height - j), cam->image_height);
     fflush(stderr);
     for (int i = 0; i < cam->image_width; i++) {
       color pixel_color = vec3_create(0, 0, 0);

@@ -59,8 +59,8 @@ int main() {
   camera cam;
   cam.aspect_ratio      = 16.0 / 9.0;
   cam.image_width       = 1200;
-  cam.samples_per_pixel = 50;
-  cam.max_depth         = 10;
+  cam.samples_per_pixel = 500;
+  cam.max_depth         = 50;
   cam.vfov              = 20;
   cam.lookfrom          = vec3_create(13, 2, 3);
   cam.lookat            = vec3_create(0, 0, 0);
