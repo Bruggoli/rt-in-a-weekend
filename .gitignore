@@ -2,3 +2,5 @@ image.ppm
 main
 # remove logs from perf (logger)
 *.data*
+# object files from compilation
+*.o
