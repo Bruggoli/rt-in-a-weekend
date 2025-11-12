@@ -1,7 +1,11 @@
 CC = gcc
 NVCC = nvcc
 CFLAGS = -Wall -O3
-NVCCFLAGS = -O3 -arch=sm_70 --compiler-options -fPIC
+# GPU architecture - automatically detect or use default
+# Common values: sm_52 (Maxwell), sm_61 (Pascal), sm_75 (Turing), sm_86 (Ampere)
+# To override: make GPU_ARCH=sm_75
+GPU_ARCH ?= sm_52
+NVCCFLAGS = -O3 -arch=$(GPU_ARCH) --use_fast_math --compiler-options "-O3 -fPIC"
 LDFLAGS = -lm -lcudart -L/usr/local/cuda/lib64
 TARGET = main
 
@@ -22,6 +26,7 @@ $(TARGET): $(C_OBJECTS) $(CU_OBJECTS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o: %.cu
+	@echo "Compiling CUDA with architecture: $(GPU_ARCH)"
 	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
 clean:
@@ -30,4 +35,9 @@ clean:
 run: $(TARGET)
 	./$(TARGET) > image.ppm
 
-.PHONY: all clean run
+# Auto-detect GPU architecture
+detect:
+	@echo "Detecting GPU architecture..."
+	@nvidia-smi --query-gpu=compute_cap --format=csv,noheader | head -1 | sed 's/\.//g' | sed 's/^/sm_/'
+
+.PHONY: all clean run detect

@@ -9,6 +9,8 @@ extern "C" {
 #endif
 
 // CUDA-compatible structures (must match camera_cuda.cu)
+// Note: These use vec3 (double precision) on host side
+// They are converted to float precision inside CUDA code for performance
 typedef struct {
     vec3 center;
     double radius;
