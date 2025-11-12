@@ -24,7 +24,7 @@ bool metal_scatter(material* self, ray r_in, hit_record* rec, color* attenuation
   vec3 reflected = reflect(r_in.dir, rec->normal);
   metal* m = (metal*)self->data;
   reflected = vec3_add(unit_vector(reflected), vec3_scale(vec3_random_unit_vector(), m->fuzz));
-  *scattered = ray_create(rec->p, reflected);
+  *scattered = ray_create(rec->p, reflected, r_in.tm);
   *attenuation = m->albedo;
   return true;
 }

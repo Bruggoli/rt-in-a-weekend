@@ -31,7 +31,8 @@ int main() {
           // diffuse
           color albedo = vec3_mul(vec3_random(), vec3_random());
           sphere_material = mat_lambertian(albedo);
-          hittable_list_add(world, sphere_create(center, 0.2, sphere_material));
+          point3 center2 = vec3_add(center, vec3_create(0, random_double_range(0, 0.5), 0));
+          hittable_list_add(world, sphere_create_moving(center, center2, 0.2, sphere_material));
         } else if (choose_mat < 0.95) {
           // metal
           color albedo = vec3_random_range(0.5, 1);
@@ -58,8 +59,8 @@ int main() {
 
   camera cam;
   cam.aspect_ratio      = 16.0 / 9.0;
-  cam.image_width       = 1200;
-  cam.samples_per_pixel = 500;
+  cam.image_width       = 400;
+  cam.samples_per_pixel = 100;
   cam.max_depth         = 50;
   cam.vfov              = 20;
   cam.lookfrom          = vec3_create(13, 2, 3);

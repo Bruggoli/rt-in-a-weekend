@@ -27,7 +27,7 @@ bool lambertian_scatter(material* self, ray r_in, hit_record* rec, color* attenu
     scatter_direction = rec->normal;
 
   // TODO: figure out why this has to be dereferenced before use
-  *scattered = ray_create(rec->p, scatter_direction);
+  *scattered = ray_create(rec->p, scatter_direction, r_in.tm);
 
   lambertian* l = (lambertian*)self->data;
   // Same here!

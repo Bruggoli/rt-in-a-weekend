@@ -139,8 +139,10 @@ ray camera_get_ray(camera* c, double i, double j) {
   );
   
   vec3 ray_origin = (defocus_angle <= 0) ? c->center : (vec3)defocus_disk_sample(c);
+  vec3 ray_direction = vec3_sub(pixel_sample, c->center);
+  double ray_time = random_double();
 
-  return ray_create(c->center, vec3_sub(pixel_sample, c->center));
+  return ray_create(ray_origin, ray_direction, ray_time);
 }
 
 vec3 ray_sample_square() {
