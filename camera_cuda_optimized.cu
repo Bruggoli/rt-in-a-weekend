@@ -2,6 +2,7 @@
 #include <curand_kernel.h>
 #include <stdio.h>
 #include <time.h>
+#include <omp.h>
 #include "vec3.h"
 #include "ray.h"
 #include "camera.h"
@@ -816,8 +817,11 @@ extern "C" void cuda_render_optimized(
         return;
     }
 
-    // Convert to float precision
+    // Convert to float precision (parallelized with OpenMP)
+    double convert_start = omp_get_wtime();
+
     CudaSphere* float_spheres = (CudaSphere*)malloc(num_spheres * sizeof(CudaSphere));
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < num_spheres; i++) {
         float_spheres[i].center = make_float3(
             (float)host_spheres[i].center.e[0],
@@ -829,6 +833,7 @@ extern "C" void cuda_render_optimized(
     }
 
     CudaMaterial* float_materials = (CudaMaterial*)malloc(num_materials * sizeof(CudaMaterial));
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < num_materials; i++) {
         float_materials[i].type = host_materials[i].type;
         float_materials[i].albedo = make_float3(
@@ -838,9 +843,20 @@ extern "C" void cuda_render_optimized(
         );
         float_materials[i].fuzz = (float)host_materials[i].fuzz;
         float_materials[i].ref_idx = (float)host_materials[i].ref_idx;
+        // Initialize emission for emissive materials
+        if (host_materials[i].type == 3) {  // EMISSIVE
+            float_materials[i].emission = make_float3(
+                (float)host_materials[i].albedo.e[0] * 10.0f,  // Brightness multiplier
+                (float)host_materials[i].albedo.e[1] * 10.0f,
+                (float)host_materials[i].albedo.e[2] * 10.0f
+            );
+        } else {
+            float_materials[i].emission = make_float3(0.0f, 0.0f, 0.0f);
+        }
     }
 
     CudaBVHNode* float_bvh_nodes = (CudaBVHNode*)malloc(num_bvh_nodes * sizeof(CudaBVHNode));
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < num_bvh_nodes; i++) {
         float_bvh_nodes[i].bounds.min = make_float3(
             (float)host_bvh_nodes[i].bounds.min.e[0],
@@ -857,6 +873,9 @@ extern "C" void cuda_render_optimized(
         float_bvh_nodes[i].sphere_start = host_bvh_nodes[i].sphere_start;
         float_bvh_nodes[i].sphere_count = host_bvh_nodes[i].sphere_count;
     }
+
+    double convert_time = omp_get_wtime() - convert_start;
+    fprintf(stderr, "✓ Data conversion: %.3f sec (%d threads)\n", convert_time, omp_get_max_threads());
 
     // Allocate device memory
     vec3* d_image_buffer;
@@ -911,16 +930,22 @@ extern "C" void cuda_render_optimized(
     fprintf(stderr, "GPU utilization should be 90%%+ with %d samples/thread\n", SAMPLES_PER_THREAD);
 
     // Copy data to device
+    double transfer_start = omp_get_wtime();
     cudaMemcpy(d_spheres, float_spheres, num_spheres * sizeof(CudaSphere), cudaMemcpyHostToDevice);
     cudaMemcpy(d_bvh_nodes, float_bvh_nodes, num_bvh_nodes * sizeof(CudaBVHNode), cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(c_materials, float_materials, num_materials * sizeof(CudaMaterial));
+    double transfer_time = omp_get_wtime() - transfer_start;
+    fprintf(stderr, "✓ CPU→GPU transfer: %.3f sec\n", transfer_time);
 
     // Initialize block-level random states
+    double init_start = omp_get_wtime();
     int threads_for_init = 256;
     int blocks_for_init = (num_blocks + threads_for_init - 1) / threads_for_init;
     init_block_random_states<<<blocks_for_init, threads_for_init>>>(
         d_block_rand_states, (unsigned long)time(NULL), num_blocks);
     cudaDeviceSynchronize();
+    double init_time = omp_get_wtime() - init_start;
+    fprintf(stderr, "✓ RNG initialization: %.3f sec\n", init_time);
 
     // Convert camera parameters to float
     float3 pixel00_loc = make_float3_from_double(

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <float.h>
 #include <stdio.h>
+#include <omp.h>
 
 // Helper to get min/max
 static inline double dmin(double a, double b) { return a < b ? a : b; }
@@ -202,12 +203,15 @@ static int build_recursive(
 
 // Build BVH from sphere array
 BVHNode* build_bvh(void* sphere_array, int num_spheres, int* out_node_count) {
-    fprintf(stderr, "Building BVH for %d spheres...\n", num_spheres);
+    double start_time = omp_get_wtime();
+    fprintf(stderr, "Building BVH for %d spheres using %d CPU threads...\n",
+            num_spheres, omp_get_max_threads());
 
     CudaSphere* spheres = (CudaSphere*)sphere_array;
 
-    // Create sphere info array
+    // Create sphere info array (parallelized)
     SphereInfo* infos = malloc(num_spheres * sizeof(SphereInfo));
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < num_spheres; i++) {
         infos[i].bounds = sphere_aabb(spheres[i].center, spheres[i].radius);
         infos[i].centroid = aabb_centroid(infos[i].bounds);
@@ -222,17 +226,24 @@ BVHNode* build_bvh(void* sphere_array, int num_spheres, int* out_node_count) {
     builder.spheres = spheres;
     builder.sphere_indices = malloc(num_spheres * sizeof(int));
 
-    // Build tree
+    // Build tree (recursive - cannot be parallelized easily)
+    double tree_start = omp_get_wtime();
     build_recursive(&builder, infos, 0, num_spheres);
+    double tree_time = omp_get_wtime() - tree_start;
 
-    fprintf(stderr, "BVH built: %d nodes for %d spheres\n", builder.node_count, num_spheres);
-
-    // Reorder spheres based on BVH traversal order
+    // Reorder spheres based on BVH traversal order (parallelized)
+    double reorder_start = omp_get_wtime();
     CudaSphere* reordered_spheres = malloc(num_spheres * sizeof(CudaSphere));
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < num_spheres; i++) {
         reordered_spheres[i] = spheres[builder.sphere_indices[i]];
     }
     memcpy(spheres, reordered_spheres, num_spheres * sizeof(CudaSphere));
+    double reorder_time = omp_get_wtime() - reorder_start;
+
+    double total_time = omp_get_wtime() - start_time;
+    fprintf(stderr, "✓ BVH built: %d nodes for %d spheres in %.3f sec (tree: %.3f, reorder: %.3f)\n",
+            builder.node_count, num_spheres, total_time, tree_time, reorder_time);
 
     free(infos);
     free(reordered_spheres);

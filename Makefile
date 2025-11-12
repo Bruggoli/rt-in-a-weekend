@@ -1,12 +1,12 @@
 CC = gcc
 NVCC = nvcc
-CFLAGS = -Wall -O3
+CFLAGS = -Wall -O3 -fopenmp
 # GPU architecture - automatically detect or use default
 # Common values: sm_52 (Maxwell), sm_61 (Pascal), sm_75 (Turing), sm_86 (Ampere)
 # To override: make GPU_ARCH=sm_75
 GPU_ARCH ?= sm_52
 NVCCFLAGS = -O3 -arch=$(GPU_ARCH) --use_fast_math --compiler-options "-O3 -fPIC"
-LDFLAGS = -lm -lcudart -L/usr/local/cuda/lib64
+LDFLAGS = -lm -lcudart -L/usr/local/cuda/lib64 -fopenmp
 TARGET = main
 
 # C source files
