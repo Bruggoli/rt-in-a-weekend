@@ -5,9 +5,10 @@
 #include "ray.h"
 #include "rtweekend.h"
 #include "vec3.h"
+#include "camera_cuda.h"
+#include "scene_converter.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
 
 
 // Sets default values in case they are not set where they are used
@@ -32,27 +33,23 @@ void render(hittable* world, camera* cam) {
   // Allocate buffer for all pixels
   color* image_buffer = malloc(cam->image_width * cam->image_height * sizeof(color));
 
-  // Parallel computation of all pixels
-  #pragma omp parallel for schedule(dynamic, 1)
-  for (int j = 0; j < cam->image_height; j++) {
-    // Progress reporting with thread safety
-    #pragma omp critical
-    {
-      fprintf(stderr, "\rScanlines remaining: %d ", (cam->image_height - j));
-      fflush(stderr);
-    }
+  // Convert scene to CUDA-compatible format
+  CudaSphere* spheres;
+  CudaMaterial* materials;
+  int num_spheres, num_materials;
 
-    for (int i = 0; i < cam->image_width; i++) {
-      color pixel_color = vec3_create(0, 0, 0);
-      for (int sample = 0; sample < cam->samples_per_pixel; sample++) {
-        ray r = camera_get_ray(cam, i, j);
-        pixel_color = vec3_add(pixel_color, ray_color(r, cam->max_depth, world));
-      }
-      image_buffer[j * cam->image_width + i] = vec3_scale(pixel_color, cam->pixel_samples_scale);
-    }
-  }
+  fprintf(stderr, "Converting scene to CUDA format...\n");
+  convert_scene_to_cuda(world, &spheres, &num_spheres, &materials, &num_materials);
+
+  // Run CUDA rendering
+  fprintf(stderr, "Launching CUDA renderer...\n");
+  cuda_render(image_buffer, world, cam, spheres, num_spheres, materials, num_materials);
+
+  // Free converted scene data
+  free_cuda_scene(spheres, materials);
 
   // Sequential write to maintain PPM format
+  fprintf(stderr, "Writing image...\n");
   for (int j = 0; j < cam->image_height; j++) {
     for (int i = 0; i < cam->image_width; i++) {
       write_color(stdout, image_buffer[j * cam->image_width + i]);
@@ -60,7 +57,6 @@ void render(hittable* world, camera* cam) {
   }
 
   free(image_buffer);
-  fprintf(stderr, "\r                                \n");
   fprintf(stderr, "\rDone.\n");
 }
 
