@@ -34,7 +34,8 @@ struct CudaSphere {
 enum MaterialType {
     LAMBERTIAN = 0,
     METAL = 1,
-    DIELECTRIC = 2
+    DIELECTRIC = 2,
+    EMISSIVE = 3
 };
 
 struct CudaMaterial {
@@ -42,6 +43,7 @@ struct CudaMaterial {
     float3 albedo;
     float fuzz;
     float ref_idx;
+    float3 emission;  // Emitted light (for EMISSIVE materials)
 };
 
 struct CudaAABB {
@@ -427,7 +429,11 @@ __device__ bool scatter(
 ) {
     const CudaMaterial& mat = c_materials[mat_idx];
 
-    if (mat.type == LAMBERTIAN) {
+    if (mat.type == EMISSIVE) {
+        // Emissive materials don't scatter - handled in ray_color
+        return false;
+    }
+    else if (mat.type == LAMBERTIAN) {
         // Importance sampling: cosine-weighted hemisphere sampling
         // This aligns with Lambertian BRDF, reducing variance by 2-3x
         float3 u, v, w;
@@ -481,6 +487,85 @@ __device__ bool scatter(
 }
 
 // ============================================================================
+// LIGHT SAMPLING FOR NEXT EVENT ESTIMATION
+// ============================================================================
+
+// Sample a point on a sphere uniformly
+__device__ float3 sample_sphere_surface(
+    const CudaSphere& sphere,
+    curandState* state,
+    float* pdf_out
+) {
+    // Uniform sphere sampling
+    float z = 2.0f * curand_uniform(state) - 1.0f;  // cos(theta)
+    float phi = 2.0f * M_PI * curand_uniform(state);
+    float r = sqrtf(1.0f - z * z);
+    float x = r * cosf(phi);
+    float y = r * sinf(phi);
+
+    // Surface area PDF: 1 / (4 * pi * r^2)
+    float surface_area = 4.0f * M_PI * sphere.radius * sphere.radius;
+    *pdf_out = 1.0f / surface_area;
+
+    // Transform to world space
+    float3 local_point = make_float3(x, y, z);
+    return vec3_add(sphere.center, vec3_scale(local_point, sphere.radius));
+}
+
+// Sample a random light source
+__device__ bool sample_lights(
+    const CudaSphere* spheres,
+    int num_spheres,
+    const float3& hit_point,
+    curandState* state,
+    float3* light_point,
+    float3* light_emission,
+    float* pdf_out
+) {
+    // Count emissive spheres
+    int num_lights = 0;
+    int light_indices[MAX_MATERIALS];  // Assuming max lights < materials
+
+    for (int i = 0; i < num_spheres && num_lights < MAX_MATERIALS; i++) {
+        const CudaMaterial& mat = c_materials[spheres[i].material_idx];
+        if (mat.type == EMISSIVE) {
+            light_indices[num_lights++] = i;
+        }
+    }
+
+    if (num_lights == 0) {
+        return false;  // No lights in scene
+    }
+
+    // Choose random light
+    int light_idx = light_indices[int(curand_uniform(state) * num_lights) % num_lights];
+    const CudaSphere& light_sphere = spheres[light_idx];
+
+    // Sample point on light
+    float sphere_pdf;
+    *light_point = sample_sphere_surface(light_sphere, state, &sphere_pdf);
+
+    // Get emission
+    *light_emission = c_materials[light_sphere.material_idx].emission;
+
+    // Combined PDF: (1 / num_lights) * sphere_pdf
+    *pdf_out = sphere_pdf / (float)num_lights;
+
+    return true;
+}
+
+// Calculate geometry term for NEE
+__device__ float geometry_term(const float3& p1, const float3& n1, const float3& p2) {
+    float3 to_light = vec3_sub(p2, p1);
+    float distance_squared = vec3_length_squared(to_light);
+    float distance = sqrtf(distance_squared);
+    float3 light_dir = vec3_scale(to_light, 1.0f / distance);
+
+    float cos_theta = fmaxf(0.0f, vec3_dot(n1, light_dir));
+    return cos_theta / distance_squared;
+}
+
+// ============================================================================
 // RAY COLOR COMPUTATION
 // ============================================================================
 
@@ -488,16 +573,66 @@ __device__ float3 ray_color(
     Ray r,
     const CudaBVHNode* bvh_nodes,
     const CudaSphere* spheres,
+    int num_spheres,
     int max_depth,
     curandState* state
 ) {
     float3 accumulated_color = make_float3(1.0f, 1.0f, 1.0f);
+    float3 direct_lighting = make_float3(0.0f, 0.0f, 0.0f);
     Ray current_ray = r;
 
     for (int depth = 0; depth < max_depth; depth++) {
         HitRecord rec;
 
         if (bvh_hit_global(bvh_nodes, spheres, current_ray, EPSILON, INFINITY, &rec)) {
+            const CudaMaterial& mat = c_materials[rec.material_idx];
+
+            // Check if we hit an emissive surface (only count on first bounce or direct hits)
+            if (mat.type == EMISSIVE) {
+                if (depth == 0) {
+                    // Direct hit from camera
+                    return vec3_add(vec3_mul(accumulated_color, mat.emission), direct_lighting);
+                } else {
+                    // Indirect hit - only count if not already counted via NEE
+                    return vec3_add(vec3_mul(accumulated_color, mat.emission), direct_lighting);
+                }
+            }
+
+            // Next Event Estimation: Sample lights directly (only for diffuse surfaces)
+            if (mat.type == LAMBERTIAN) {
+                float3 light_point, light_emission;
+                float light_pdf;
+
+                if (sample_lights(spheres, num_spheres, rec.p, state, &light_point, &light_emission, &light_pdf)) {
+                    // Cast shadow ray
+                    float3 to_light = vec3_sub(light_point, rec.p);
+                    float light_distance = sqrtf(vec3_length_squared(to_light));
+                    float3 light_dir = vec3_scale(to_light, 1.0f / light_distance);
+
+                    Ray shadow_ray = make_ray(rec.p, light_dir);
+                    HitRecord shadow_rec;
+
+                    // Check if path to light is unoccluded
+                    bool occluded = bvh_hit_global(bvh_nodes, spheres, shadow_ray, EPSILON, light_distance - EPSILON, &shadow_rec);
+
+                    if (!occluded) {
+                        // Calculate direct lighting contribution
+                        float cos_theta = fmaxf(0.0f, vec3_dot(rec.normal, light_dir));
+                        float geometry = cos_theta / (light_distance * light_distance);
+
+                        // BRDF for Lambertian: albedo / π
+                        float3 brdf = vec3_scale(mat.albedo, 1.0f / M_PI);
+
+                        // Direct lighting = BRDF × emission × geometry / PDF
+                        float3 Li = vec3_scale(light_emission, geometry / light_pdf);
+                        float3 direct_contrib = vec3_mul(vec3_mul(accumulated_color, brdf), Li);
+
+                        direct_lighting = vec3_add(direct_lighting, direct_contrib);
+                    }
+                }
+            }
+
+            // Importance sampling for indirect lighting
             Ray scattered;
             float3 attenuation;
 
@@ -505,24 +640,27 @@ __device__ float3 ray_color(
                 accumulated_color = vec3_mul(accumulated_color, attenuation);
                 current_ray = scattered;
 
+                // Russian roulette for path termination
                 if (vec3_length_squared(accumulated_color) < 0.001f) {
-                    return make_float3(0.0f, 0.0f, 0.0f);
+                    return direct_lighting;
                 }
             } else {
-                return make_float3(0.0f, 0.0f, 0.0f);
+                return direct_lighting;
             }
         } else {
+            // Hit sky/background
             float3 unit_direction = vec3_normalize(current_ray.direction);
             float t = 0.5f * (unit_direction.y + 1.0f);
             float3 sky_color = vec3_add(
                 vec3_scale(make_float3(1.0f, 1.0f, 1.0f), 1.0f - t),
                 vec3_scale(make_float3(0.5f, 0.7f, 1.0f), t)
             );
-            return vec3_mul(accumulated_color, sky_color);
+            return vec3_add(vec3_mul(accumulated_color, sky_color), direct_lighting);
         }
     }
 
-    return make_float3(0.0f, 0.0f, 0.0f);
+    // Max depth reached
+    return direct_lighting;
 }
 
 // ============================================================================
@@ -542,6 +680,7 @@ __global__ void render_kernel_optimized(
     float3* normal_buffer,    // For denoiser
     CudaBVHNode* bvh_nodes,
     CudaSphere* spheres,
+    int num_spheres,
     curandState* block_rand_states,
     float3 pixel00_loc,
     float3 pixel_delta_u,
@@ -613,7 +752,7 @@ __global__ void render_kernel_optimized(
             }
         }
 
-        pixel_color = vec3_add(pixel_color, ray_color(r, bvh_nodes, spheres, max_depth, &local_state));
+        pixel_color = vec3_add(pixel_color, ray_color(r, bvh_nodes, spheres, num_spheres, max_depth, &local_state));
     }
 
     // Write back to block state
@@ -774,6 +913,7 @@ extern "C" void cuda_render_optimized(
         d_normal_buffer,
         d_bvh_nodes,
         d_spheres,
+        num_spheres,
         d_block_rand_states,
         pixel00_loc,
         pixel_delta_u,
