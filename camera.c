@@ -8,12 +8,16 @@
 #include "camera_cuda.h"
 #include "scene_converter.h"
 #include "bvh.h"
+#include "denoiser.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-// Function prototypes for BVH-accelerated rendering
-extern void cuda_render_bvh(
+// Function prototypes for optimized rendering
+extern void cuda_render_optimized(
     vec3* host_image_buffer,
+    float3* host_albedo_buffer,
+    float3* host_normal_buffer,
     void* host_world,
     camera* cam,
     CudaSphere* host_spheres,
@@ -44,8 +48,24 @@ void render(hittable* world, camera* cam) {
 
   printf("P3\n%d %d\n255\n", cam->image_width, cam->image_height);
 
-  // Allocate buffer for all pixels
-  color* image_buffer = malloc(cam->image_width * cam->image_height * sizeof(color));
+  int num_pixels = cam->image_width * cam->image_height;
+
+  // Allocate buffers for rendering
+  color* image_buffer = malloc(num_pixels * sizeof(color));
+
+  // Allocate denoiser buffers if OIDN is available
+  typedef struct { float e[3]; } float3;
+  float3* albedo_buffer = NULL;
+  float3* normal_buffer = NULL;
+
+  int use_denoiser = is_oidn_available();
+  if (use_denoiser) {
+    albedo_buffer = (float3*)malloc(num_pixels * sizeof(float3));
+    normal_buffer = (float3*)malloc(num_pixels * sizeof(float3));
+    fprintf(stderr, "AI Denoising: ENABLED\n");
+  } else {
+    fprintf(stderr, "AI Denoising: Not available (render with more samples for quality)\n");
+  }
 
   // Convert scene to CUDA-compatible format
   CudaSphere* spheres;
@@ -59,14 +79,40 @@ void render(hittable* world, camera* cam) {
   int num_bvh_nodes;
   BVHNode* bvh_nodes = build_bvh(spheres, num_spheres, &num_bvh_nodes);
 
-  // Run BVH-accelerated CUDA rendering
-  fprintf(stderr, "Launching BVH-accelerated CUDA renderer...\n");
-  cuda_render_bvh(image_buffer, world, cam, spheres, num_spheres,
-                  materials, num_materials, bvh_nodes, num_bvh_nodes);
+  // Run optimized CUDA rendering with BVH
+  fprintf(stderr, "Launching ultra-optimized CUDA renderer...\n");
+  cuda_render_optimized(image_buffer, albedo_buffer, normal_buffer, world, cam,
+                        spheres, num_spheres, materials, num_materials,
+                        bvh_nodes, num_bvh_nodes);
+
+  // Apply denoising if available
+  if (use_denoiser) {
+    // Convert float3 buffers to vec3 for denoiser
+    vec3* albedo_vec3 = (vec3*)malloc(num_pixels * sizeof(vec3));
+    vec3* normal_vec3 = (vec3*)malloc(num_pixels * sizeof(vec3));
+
+    for (int i = 0; i < num_pixels; i++) {
+      albedo_vec3[i].e[0] = albedo_buffer[i].e[0];
+      albedo_vec3[i].e[1] = albedo_buffer[i].e[1];
+      albedo_vec3[i].e[2] = albedo_buffer[i].e[2];
+
+      normal_vec3[i].e[0] = normal_buffer[i].e[0];
+      normal_vec3[i].e[1] = normal_buffer[i].e[1];
+      normal_vec3[i].e[2] = normal_buffer[i].e[2];
+    }
+
+    denoise_image(image_buffer, albedo_vec3, normal_vec3, cam->image_width, cam->image_height);
+
+    free(albedo_vec3);
+    free(normal_vec3);
+  }
 
   // Free BVH and converted scene data
   free_bvh(bvh_nodes);
   free_cuda_scene(spheres, materials);
+
+  if (albedo_buffer) free(albedo_buffer);
+  if (normal_buffer) free(normal_buffer);
 
   // Sequential write to maintain PPM format
   fprintf(stderr, "Writing image...\n");
