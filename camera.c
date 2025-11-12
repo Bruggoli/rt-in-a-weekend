@@ -7,8 +7,22 @@
 #include "vec3.h"
 #include "camera_cuda.h"
 #include "scene_converter.h"
+#include "bvh.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+// Function prototypes for BVH-accelerated rendering
+extern void cuda_render_bvh(
+    vec3* host_image_buffer,
+    void* host_world,
+    camera* cam,
+    CudaSphere* host_spheres,
+    int num_spheres,
+    CudaMaterial* host_materials,
+    int num_materials,
+    BVHNode* host_bvh_nodes,
+    int num_bvh_nodes
+);
 
 
 // Sets default values in case they are not set where they are used
@@ -41,11 +55,17 @@ void render(hittable* world, camera* cam) {
   fprintf(stderr, "Converting scene to CUDA format...\n");
   convert_scene_to_cuda(world, &spheres, &num_spheres, &materials, &num_materials);
 
-  // Run CUDA rendering
-  fprintf(stderr, "Launching CUDA renderer...\n");
-  cuda_render(image_buffer, world, cam, spheres, num_spheres, materials, num_materials);
+  // Build BVH acceleration structure
+  int num_bvh_nodes;
+  BVHNode* bvh_nodes = build_bvh(spheres, num_spheres, &num_bvh_nodes);
 
-  // Free converted scene data
+  // Run BVH-accelerated CUDA rendering
+  fprintf(stderr, "Launching BVH-accelerated CUDA renderer...\n");
+  cuda_render_bvh(image_buffer, world, cam, spheres, num_spheres,
+                  materials, num_materials, bvh_nodes, num_bvh_nodes);
+
+  // Free BVH and converted scene data
+  free_bvh(bvh_nodes);
   free_cuda_scene(spheres, materials);
 
   // Sequential write to maintain PPM format

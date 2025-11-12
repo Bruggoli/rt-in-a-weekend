@@ -13,8 +13,8 @@ TARGET = main
 C_SOURCES = $(filter-out camera_cuda.c, $(wildcard *.c))
 C_OBJECTS = $(C_SOURCES:.c=.o)
 
-# CUDA source files
-CU_SOURCES = camera_cuda.cu
+# CUDA source files (using BVH-accelerated version)
+CU_SOURCES = camera_cuda_bvh.cu
 CU_OBJECTS = $(CU_SOURCES:.cu=.o)
 
 all: $(TARGET)
@@ -30,7 +30,7 @@ $(TARGET): $(C_OBJECTS) $(CU_OBJECTS)
 	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(C_OBJECTS) $(CU_OBJECTS) $(TARGET) image.ppm
+	rm -f $(C_OBJECTS) $(CU_OBJECTS) $(TARGET) image.ppm *.o
 
 run: $(TARGET)
 	./$(TARGET) > image.ppm
