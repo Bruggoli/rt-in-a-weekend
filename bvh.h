@@ -14,13 +14,13 @@ typedef struct {
 
 hittable* bvh_node_create_range(hittable_list* list);
 
-hittable* bvh_node_create(hittable* objects, size_t start, size_t end);
+hittable* bvh_node_create(hittable** objects, size_t start, size_t end);
 
 bool bvh_node_hit(hittable* self, ray r, interval ray_t, hit_record* rec);
 
-aabb bounding_box();
-
 int box_compare(const void* a, const void* b, int axis_index);
+
+aabb bvh_node_bounding_box(hittable* self);
 
 int box_x_compare(const void* a, const void* b); 
 int box_y_compare(const void* a, const void* b); 

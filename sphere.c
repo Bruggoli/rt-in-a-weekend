@@ -15,7 +15,6 @@ aabb sphere_bounding_box(hittable* self);
 
 
 hittable* sphere_create(point3 static_center, double radius, material* mat) {
-
   hittable* h = malloc(sizeof(hittable));
   sphere* s = malloc(sizeof(sphere));
 
@@ -36,7 +35,6 @@ hittable* sphere_create(point3 static_center, double radius, material* mat) {
 };
 
 hittable* sphere_create_moving(point3 center1, point3 center2, double radius, material* mat) {
-  // TODO: Initialise pointer to the material `mat`
   hittable* h = malloc(sizeof(hittable));
   sphere* s = malloc(sizeof(sphere));
 
@@ -53,6 +51,7 @@ hittable* sphere_create_moving(point3 center1, point3 center2, double radius, ma
 
   h->data = s;
   h->hit  = sphere_hit;
+  h->bounding_box = sphere_bounding_box;
 
   return h;
 };

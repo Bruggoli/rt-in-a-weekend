@@ -1,13 +1,16 @@
 #include "hittable_list.h"
 #include "aabb.h"
 #include "hittable.h"
+#include "interval.h"
 #include "rtweekend.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #define INITIAL_CAPACITY 10
 
 hittable* hittable_list_create(void) {
+  fprintf(stderr, "Creating hittable list...\n");
   hittable* h = malloc(sizeof(hittable));
   hittable_list* list = malloc(sizeof(hittable_list));
   list->capacity = INITIAL_CAPACITY;
@@ -16,6 +19,9 @@ hittable* hittable_list_create(void) {
   // instance, then multiplies that by max capacity
   list->objects = malloc(sizeof(hittable*) * list->capacity);
 
+  list->bbox = (aabb){interval_empty(), interval_empty(), interval_empty()};
+
+  h->bounding_box = hittable_list_bounding_box;
   h->data = list;
   h->hit = hittable_list_hit;
 
@@ -23,17 +29,36 @@ hittable* hittable_list_create(void) {
 }
 
 void hittable_list_add(hittable* h, hittable* object) {
+  fprintf(stderr, "Adding to hittable_list...\n");
   hittable_list* list = (hittable_list*) h->data;
+
   // checks if cap is full
   // if it is double capacity
   if (list->capacity <= list->count) {
+
+    fprintf(stderr, "Malloc ran out for hittable list:%d/%d adding more...\n", list->count, list->capacity);
     list->capacity *= 2;
     list->objects = realloc(list->objects, sizeof(hittable*) * list->capacity);
   }
 
-  h->bounding_box = aabb_add(h->bounding_box, object->bounding_box);
+
+  if (!object) {
+    fprintf(stderr, "ERROR: object is NULL!\n");
+    return;
+  }
+
+  if (!object->bounding_box) {
+    fprintf(stderr, "ERROR: object->bounding_box is NULL!\n");
+    return;
+  }
+
+  fprintf(stderr, "calling bounding_box\n");
+  list->bbox = aabb_add(list->bbox, object->bounding_box(object));
+  fflush(stderr); 
+  fprintf(stderr, "Checkpoint!\n");
   // Adds the objects to the list, incrementing count after
   list->objects[list->count++] = object;
+  fprintf(stderr, "Added to hittable_list!\n");
 }
 
 void hittable_list_clear(hittable_list *list) {
@@ -60,6 +85,14 @@ bool hittable_list_hit(hittable* self, ray r, interval ray_t, hit_record *rec) {
 
   return hit_anything;
 }
+
+aabb hittable_list_bounding_box(hittable* self) {
+  fprintf(stderr, "Creating hlbb..\n");
+  hittable_list* list = (hittable_list*)self->data;
+
+  return list->bbox;
+}
+
 
 void hittable_list_destroy(hittable_list *list) {
   free(list->objects);

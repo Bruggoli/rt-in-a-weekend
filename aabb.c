@@ -1,28 +1,40 @@
 #import "aabb.h"
 #include "interval.h"
+#include "hittable.h"
 
 
 aabb aabb_create_from_interval(interval x, interval y, interval z) {
+  
+  fprintf(stderr, "creating aabb from interval...\n");
   aabb bb;
 
   bb.x = x;
   bb.y = y;
   bb.z = z;
 
+  fprintf(stderr, "created aabb from interval!\n");
   return bb;
 }
 
 aabb aabb_create_from_point(point3 a, point3 b) {
+  fprintf(stderr, "creating aabb from point...\n");
   aabb bb;
 
   bb.x = (a.e[0] <= b.e[0] ? interval_create(a.e[0], b.e[0]) : interval_create(b.e[0], a.e[0]));
   bb.y = (a.e[1] <= b.e[1] ? interval_create(a.e[1], b.e[1]) : interval_create(b.e[1], a.e[1]));
   bb.z = (a.e[2] <= b.e[2] ? interval_create(a.e[2], b.e[2]) : interval_create(b.e[2], a.e[2]));
 
+  fprintf(stderr, "created aabb from point!\n");
+  return bb;
+}
+
+aabb aabb_create_empty() {
+  aabb bb;
   return bb;
 }
 
 aabb aabb_add(aabb box0, aabb box1) {
+
   aabb box_out;
   box_out.x = interval_enclose(box0.x, box1.x);
   box_out.y = interval_enclose(box0.y, box1.y);
@@ -37,6 +49,7 @@ interval axis_interval(aabb* bb, int n) {
 }
 
 bool aabb_hit(aabb* bb ,ray r, interval ray_t) {
+
 
   point3  ray_orig  = r.orig;
   vec3    ray_dir   = r.dir;
@@ -64,4 +77,20 @@ bool aabb_hit(aabb* bb ,ray r, interval ray_t) {
   return true;
 }
 
+int longest_axis(hittable* self) {
+  aabb* bb = self->data;
+  int x = interval_size(bb->x);
+  int y = interval_size(bb->y);
+  int z = interval_size(bb->z);
+  if (x > z)
+    return x > z ? 0 : 2;
+  else
+    return y > z ? 1 : 2;
+}
 
+void aabb_print(FILE* out, aabb bb) {
+  fprintf(out, "AABB: x[%.3f, %.3f] y[%.3f, %.3f] z[%.3f, %.3f]\n",
+          bb.x.min, bb.x.max,
+          bb.y.min, bb.y.max,
+          bb.z.min, bb.z.max);
+}

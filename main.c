@@ -16,8 +16,6 @@ int main() {
   
   hittable* world = hittable_list_create();
 
-  hittable* bvh_root = bvh_node_create(world);
-
   material* ground_material = mat_lambertian(vec3_create(0.5, 0.5, 0.5));
   hittable_list_add(world, sphere_create(vec3_create(0, -1000, 0), 1000, ground_material));
 
@@ -58,6 +56,18 @@ int main() {
 
   material* material3 = mat_metal(vec3_create(0.7, 0.6, 0.5), 0.0);
   hittable_list_add(world, sphere_create(vec3_create(4, 1, 0), 1.0, material3));
+  
+  fprintf(stderr, "Finished adding objects to world\n");
+
+// set up bvh
+  hittable_list* world_data = (hittable_list*)world->data;
+
+  hittable* bvh_root = bvh_node_create_range(world_data);
+  // We need to overwrite the old world instead of just adding the bvh root to the old world
+  // BVH allegedly already contains all the objects PLUS the bounding boxes
+  hittable* new_world = hittable_list_create();
+  hittable_list_add(new_world, bvh_root);
+  world = new_world;
 
   camera cam;
   cam.aspect_ratio      = 16.0 / 9.0;
