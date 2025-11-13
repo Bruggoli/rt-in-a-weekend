@@ -5,6 +5,7 @@
 #include "vec3.h"
 #include "interval.h"
 #include <stdbool.h>
+#include "aabb.h"
 
 // forward declaration to prevent recursive include calls
 typedef struct material material;
@@ -24,11 +25,12 @@ typedef struct hittable hittable;
 
 typedef bool (*hit_fn)(hittable* self, ray r, interval ray_t, hit_record* rec);
 
+typedef aabb (*bounding_box_fn)(hittable* self);
+
 struct hittable {
   hit_fn hit;
+  bounding_box_fn bounding_box;
   void* data;
 };
-
-
 
 #endif

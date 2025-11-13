@@ -1,4 +1,5 @@
 #include "hittable_list.h"
+#include "aabb.h"
 #include "hittable.h"
 #include "rtweekend.h"
 
@@ -30,6 +31,7 @@ void hittable_list_add(hittable* h, hittable* object) {
     list->objects = realloc(list->objects, sizeof(hittable*) * list->capacity);
   }
 
+  h->bounding_box = aabb_add(h->bounding_box, object->bounding_box);
   // Adds the objects to the list, incrementing count after
   list->objects[list->count++] = object;
 }

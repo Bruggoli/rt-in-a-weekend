@@ -3,11 +3,12 @@
 
 #include "hittable.h"
 #include "interval.h"
-
+#include "aabb.h"
 typedef struct {
   hittable ** objects; // pointer to an array of pointers (idk how it works yet)
   int count;
   int capacity;
+  aabb bbox;
 } hittable_list;
 
 hittable* hittable_list_create(void);

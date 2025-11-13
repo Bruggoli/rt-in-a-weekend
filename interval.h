@@ -13,10 +13,14 @@ interval interval_empty(void);
 
 double interval_size(interval i);
 
+interval interval_enclose(interval a, interval b);
+
 bool interval_contains(interval i, double x);
 
 bool interval_surrounds(interval i, double x);
 
 double clamp(interval i, double x);
+
+interval expand(interval i, double delta);
 
 #endif

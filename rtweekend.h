@@ -13,6 +13,7 @@ double degrees_to_radians(double degres);
 
 double random_double();
 double random_double_range(double min, double max);
+int random_int(int min, int max);
 
 
 // Common headers

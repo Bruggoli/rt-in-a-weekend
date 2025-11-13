@@ -2,6 +2,7 @@
 #include "hittable.h"
 #include "ray.h"
 #include "vec3.h"
+#include "aabb.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -10,18 +11,25 @@
 // needs to be declared here before its used in the "constructor" and the 
 // args arent applicable to every other shape i might implement
 bool sphere_hit(hittable* self, ray r, interval ray_t, hit_record* rec);
+aabb sphere_bounding_box(hittable* self);
 
 
-hittable* sphere_create(point3 center, double radius, material* mat) {
-  // TODO: Initialise pointer to the material `mat`
+hittable* sphere_create(point3 static_center, double radius, material* mat) {
+
   hittable* h = malloc(sizeof(hittable));
   sphere* s = malloc(sizeof(sphere));
+
+  vec3 rvec = vec3_create(radius, radius, radius);
+  s->bbox = aabb_create_from_point(vec3_sub(static_center, rvec), vec3_add(static_center, rvec));
+
+  ray center = ray_create(static_center, vec3_create(0, 0, 0), 0);
 
   s->center = center;
   s->radius = fmax(0, radius);
   s->mat    = mat;
 
   h->data = s;
+  h->bounding_box = sphere_bounding_box;
   h->hit = sphere_hit;
 
   return h;
@@ -32,22 +40,32 @@ hittable* sphere_create_moving(point3 center1, point3 center2, double radius, ma
   hittable* h = malloc(sizeof(hittable));
   sphere* s = malloc(sizeof(sphere));
 
-  s->center = (center1);
-  s->velocity = vec3_sub(center2, center1);
-  s->radius = fmax(0, radius);
-  s->mat    = mat;
+  vec3 rvec = vec3_create(radius, radius, radius);
+  ray center = ray_create(center1, vec3_sub(center2, center1), 0);
+  aabb box1 = aabb_create_from_point(vec3_sub(ray_at(center, 0), rvec), vec3_add(ray_at(center, 0), rvec));
+  aabb box2 = aabb_create_from_point(vec3_sub(ray_at(center, 1), rvec), vec3_add(ray_at(center, 1), rvec));
+
+  s->center         = center;
+  s->velocity       = vec3_sub(center2, center1);
+  s->radius         = fmax(0, radius);
+  s->mat            = mat;
+  s->bbox           = aabb_add(box1, box2);
 
   h->data = s;
-  h->hit = sphere_hit;
+  h->hit  = sphere_hit;
 
   return h;
 };
 
+aabb sphere_bounding_box(hittable* self) {
+  sphere* s = self->data;
+  return s->bbox;
+}
 
 bool sphere_hit(hittable* self, ray r, interval ray_t, hit_record* rec) {
   sphere* s = (sphere*)self->data;
 
-  point3 current_center = vec3_add(s->center, vec3_scale(s->velocity, r.tm));
+  point3 current_center = ray_at(s->center, r.tm);
   vec3 oc = vec3_sub(current_center, r.orig);
   double a = vec3_length_squared(r.dir);
   double h = vec3_dot(r.dir, oc);

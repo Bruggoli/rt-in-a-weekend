@@ -10,11 +10,13 @@
 #include "camera.h"
 #include "dielectric.h"
 #include "rtweekend.h"
-
+#include "bvh.h"
 
 int main() {
   
   hittable* world = hittable_list_create();
+
+  hittable* bvh_root = bvh_node_create(world);
 
   material* ground_material = mat_lambertian(vec3_create(0.5, 0.5, 0.5));
   hittable_list_add(world, sphere_create(vec3_create(0, -1000, 0), 1000, ground_material));
@@ -60,7 +62,7 @@ int main() {
   camera cam;
   cam.aspect_ratio      = 16.0 / 9.0;
   cam.image_width       = 400;
-  cam.samples_per_pixel = 100;
+  cam.samples_per_pixel = 20;
   cam.max_depth         = 50;
   cam.vfov              = 20;
   cam.lookfrom          = vec3_create(13, 2, 3);
