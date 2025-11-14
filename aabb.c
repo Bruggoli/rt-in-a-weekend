@@ -1,6 +1,6 @@
 #import "aabb.h"
-#include "interval.h"
-#include "hittable.h"
+#import "interval.h"
+#import "hittable.h"
 
 
 aabb aabb_create_from_interval(interval x, interval y, interval z) {
@@ -28,10 +28,6 @@ aabb aabb_create_from_point(point3 a, point3 b) {
   return bb;
 }
 
-aabb aabb_create_empty() {
-  aabb bb;
-  return bb;
-}
 
 aabb aabb_add(aabb box0, aabb box1) {
 
@@ -77,11 +73,10 @@ bool aabb_hit(aabb* bb ,ray r, interval ray_t) {
   return true;
 }
 
-int longest_axis(hittable* self) {
-  aabb* bb = self->data;
-  int x = interval_size(bb->x);
-  int y = interval_size(bb->y);
-  int z = interval_size(bb->z);
+int longest_axis(aabb* bb) {
+  double x = interval_size(bb->x);
+  double y = interval_size(bb->y);
+  double z = interval_size(bb->z);
   if (x > z)
     return x > z ? 0 : 2;
   else

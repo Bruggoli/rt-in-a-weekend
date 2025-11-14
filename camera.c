@@ -55,12 +55,12 @@ void camera_initialize(camera* c) {
   fprintf(stderr, "%d\n", c->image_height);
   fprintf(stderr, "%d\n", c->image_width);
   // Determine viewport dimensions.
-  double focal_length = vec3_length(vec3_sub(c->lookfrom, c->lookat));
+  // double focal_length = vec3_length(vec3_sub(c->lookfrom, c->lookat));
   double theta = degrees_to_radians(c->vfov);  // <-- c->vfov
   double h = tan(theta / 2);
   double viewport_height = 2.0 * h * c->focus_dist;
   double viewport_width = viewport_height * (double)c->image_width / c->image_height;  // <-- c->image_width
-  point3 camera_center = c->center;
+  //point3 camera_center = c->center;
 
   // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
   c->w = unit_vector(vec3_sub(c->lookfrom, c->lookat));
@@ -79,9 +79,9 @@ void camera_initialize(camera* c) {
   
   // calculate the position of the top left pixel
   // temp calc to avoid nesting 1
-  vec3 upper_left_calc_1= vec3_sub(camera_center, vec3_create(0, 0, focus_dist));
+  // vec3 upper_left_calc_1= vec3_sub(camera_center, vec3_create(0, 0, focus_dist));
   // temp calc 2
-  vec3 upper_left_calc_2 = vec3_add(vec3_div(viewport_u, 2), vec3_div(viewport_v, 2));
+  // vec3 upper_left_calc_2 = vec3_add(vec3_div(viewport_u, 2), vec3_div(viewport_v, 2));
   
   
   vec3 pixel_delta_scaled = vec3_scale(vec3_add(c->pixel_delta_u, c->pixel_delta_v), 0.5);

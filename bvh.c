@@ -21,7 +21,7 @@ hittable* bvh_node_create(hittable** objects, size_t start, size_t end) {
   h->hit = bvh_node_hit;
   h->bounding_box = bvh_node_bounding_box;
 
-  aabb bbox = aabb_create_empty();
+  aabb bbox;
   for (size_t object_index=start; object_index < end; object_index++)
     bbox = aabb_add(bbox, objects[object_index]->bounding_box(objects[object_index]));
 
@@ -48,6 +48,7 @@ hittable* bvh_node_create(hittable** objects, size_t start, size_t end) {
     n->left = bvh_node_create(objects, start, mid);
     n->right = bvh_node_create(objects, mid, end);
   }
+  n->bbox = bbox;
   h->data = n;
   return h;
 

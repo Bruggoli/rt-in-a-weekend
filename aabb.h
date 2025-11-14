@@ -21,7 +21,7 @@ aabb aabb_add(aabb box0, aabb box1);
 
 interval axis_interval(aabb* bb, int n);
 
-int longest_axis(hittable* self);
+int longest_axis(aabb* self);
 
 bool aabb_hit(aabb* bb, ray r, interval ray_t);
 
