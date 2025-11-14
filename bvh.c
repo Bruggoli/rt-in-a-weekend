@@ -25,7 +25,7 @@ hittable* bvh_node_create(hittable** objects, size_t start, size_t end) {
   for (size_t object_index=start; object_index < end; object_index++)
     bbox = aabb_add(bbox, objects[object_index]->bounding_box(objects[object_index]));
 
-  int axis = longest_axis(bbox);
+  int axis = longest_axis(&bbox);
 
   int (*comparator)(const void*, const void*) = 
                     (axis == 0) ? box_x_compare
@@ -78,8 +78,6 @@ aabb bvh_node_bounding_box(hittable* self) {
 int box_compare(const void* a, const void* b, int axis_index) {
 
     // What's actually stored at these addresses?
-  void* val_at_a = *(void**)a;
-  void* val_at_b = *(void**)b;
   hittable* ha = *(hittable**)a;
   hittable* hb = *(hittable**)b;
 

@@ -26,6 +26,6 @@ double time(ray r) {
 }
 
 void ray_print(FILE* out, ray r) {
-  vec3_print(stderr, r.dir);
-  vec3_print(stderr, r.orig);
+  vec3_print(out, r.dir);
+  vec3_print(out, r.orig);
 }

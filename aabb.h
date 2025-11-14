@@ -5,9 +5,7 @@
 #import "ray.h"
 
 // looks ugly but circular dependencies
-typedef struct {
-
-}hittable;
+typedef struct hittable hittable;
 
 typedef struct {
   interval  x,

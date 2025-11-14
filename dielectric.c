@@ -40,7 +40,7 @@ bool dielectric_scatter(material* self, ray r_in, hit_record* rec, color* attenu
   else
    direction = refract(unit_direction, rec->normal, ri);
 
-  vec3 refracted = refract(unit_direction, rec->normal, ri);
+  //vec3 refracted = refract(unit_direction, rec->normal, ri);
 
   *scattered = ray_create(rec->p, direction, r_in.tm);
 
