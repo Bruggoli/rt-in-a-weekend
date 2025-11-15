@@ -1,7 +1,7 @@
 #include "lambertian.h"
 #include "material.h"
-#include "ray.h"
-#include "vec3.h"
+#include "../core/ray.h"
+#include "../core/vec3.h"
 #include <stdlib.h>
 #include <stdbool.h>
 

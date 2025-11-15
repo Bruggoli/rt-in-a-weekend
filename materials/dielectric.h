@@ -1,7 +1,7 @@
 #ifndef DIELECTRIC_H
 #define DIELECTRIC_H
-#include "hittable.h"
-#include "color.h"
+#include "../core/hittable.h"
+#include "../core/color.h"
 
 typedef struct {
   double refraction_index;

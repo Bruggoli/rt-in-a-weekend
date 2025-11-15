@@ -2,8 +2,10 @@
 #define COLOR_H
 
 #include "vec3.h"
-
 #include <stdio.h>
+
+// TODO: change all instances of calling vec3 for color
+#define color_create vec3_create
 
 typedef vec3 color;
 

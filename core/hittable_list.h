@@ -1,9 +1,9 @@
-#ifndef HITTABLE_LIST
-#define HITTABLE_LIST
+#ifndef HITTABLE_LIST_H
+#define HITTABLE_LIST_H
 
 #include "hittable.h"
 #include "interval.h"
-#include "aabb.h"
+#include "../accel/aabb.h"
 typedef struct {
   hittable ** objects; // pointer to an array of pointers (idk how it works yet)
   int count;

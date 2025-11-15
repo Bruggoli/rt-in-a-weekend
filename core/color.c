@@ -1,7 +1,6 @@
 #include "color.h"
 #include "vec3.h"
 #include "interval.h"
-#include <math.h>
 #include <stdio.h>
 
 typedef vec3 color;

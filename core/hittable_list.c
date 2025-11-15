@@ -1,8 +1,7 @@
 #include "hittable_list.h"
-#include "aabb.h"
+#include "../accel/aabb.h"
 #include "hittable.h"
 #include "interval.h"
-#include "rtweekend.h"
 
 #include <stdio.h>
 #include <stdlib.h>

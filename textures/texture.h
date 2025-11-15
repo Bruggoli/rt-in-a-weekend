@@ -1,17 +1,18 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "color.h"
-#include "vec3.h"
+#include "../core/color.h"
+#include "../core/vec3.h"
 
-typedef struct {
-  color albedo;
-} texture;
+typedef struct texture texture;
 
-texture solid_color_albedo(color albedo);
-texture solid_color_rgb(double red, double green, double blue);
+typedef color (*texture_value_fn)(texture* self, double u, double v, point3 p);
 
-color texture_value(double u, double v, point3 p);
+struct texture{
+  texture_value_fn value;
+  void* data;
+};
+
 
 
 #endif

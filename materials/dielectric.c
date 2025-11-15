@@ -1,11 +1,10 @@
 #include "dielectric.h"
-#include "hittable.h"
+#include "../core/hittable.h"
 #include "material.h"
-#include "ray.h"
-#include "rtweekend.h"
-#include "vec3.h"
+#include "../core/ray.h"
+#include "../utils/rtweekend.h"
+#include "../core/vec3.h"
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 bool dielectric_scatter(material* self, ray r_in, hit_record* rec, color* attenuation, ray* scattered);

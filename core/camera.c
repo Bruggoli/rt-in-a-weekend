@@ -1,9 +1,9 @@
 #include "camera.h"
-#include "material.h"
+#include "../materials/material.h"
 #include "hittable.h"
 #include "color.h"
 #include "ray.h"
-#include "rtweekend.h"
+#include "../utils/rtweekend.h"
 #include "vec3.h"
 #include <stdio.h>
 

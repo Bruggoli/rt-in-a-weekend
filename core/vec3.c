@@ -1,5 +1,5 @@
 #include "vec3.h"
-#include "rtweekend.h"
+#include "../utils/rtweekend.h"
 #include <math.h>
 #include <stdbool.h>
 

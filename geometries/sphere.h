@@ -1,8 +1,8 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "hittable.h"
-#include "vec3.h"
+#include "../core/hittable.h"
+#include "../core/vec3.h"
 #include <stdbool.h>
 
 typedef struct {

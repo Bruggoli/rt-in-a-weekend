@@ -1,8 +1,8 @@
 #ifndef LAMBERTIAN_H
 #define LAMBERTIAN_H
 
-#include "color.h"
-#include "hittable.h"
+#include "../core/color.h"
+#include "../core/hittable.h"
 
 typedef struct {
   color albedo;

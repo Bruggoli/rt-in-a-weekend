@@ -1,7 +1,6 @@
 #include "bvh.h"
 #include "aabb.h"
-#include "interval.h"
-#include "rtweekend.h"
+#include "../core/interval.h"
 #include <stdlib.h>
 #include <stddef.h>
 

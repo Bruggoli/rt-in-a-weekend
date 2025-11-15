@@ -1,8 +1,8 @@
 #include "metal.h"
-#include "hittable.h"
+#include "../core/hittable.h"
 #include "material.h"
-#include "ray.h"
-#include "vec3.h"
+#include "../core/ray.h"
+#include "../core/vec3.h"
 #include <stdlib.h>
 
 bool metal_scatter(material* self, ray r_in, hit_record* rec, color* attenuation, ray* scattered);

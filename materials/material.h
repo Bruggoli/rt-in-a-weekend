@@ -1,10 +1,9 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "vec3.h"
-#include "color.h"
-#include "hittable.h"
-#include "aabb.h"
+#include "../core/vec3.h"
+#include "../core/color.h"
+#include "../core/hittable.h"
 
 typedef struct material material;
 

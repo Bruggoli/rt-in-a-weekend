@@ -17,10 +17,10 @@ int random_int(int min, int max);
 
 
 // Common headers
-#include "vec3.h"
-#include "ray.h"
-#include "color.h"
-#include "hittable.h"
-#include "interval.h"
+#include "../core/vec3.h"
+#include "../core/ray.h"
+#include "../core/color.h"
+#include "../core/hittable.h"
+#include "../core/interval.h"
 
 #endif

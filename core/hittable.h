@@ -5,7 +5,7 @@
 #include "vec3.h"
 #include "interval.h"
 #include <stdbool.h>
-#include "aabb.h"
+#include "../accel/aabb.h"
 
 // forward declaration to prevent recursive include calls
 typedef struct material material;
@@ -13,7 +13,9 @@ typedef struct material material;
 typedef struct hit_record {
   point3 p;
   vec3 normal;
-  double t;
+  double  t,
+          u,
+          v;
   bool front_face;
   material* mat;
 

@@ -1,6 +1,5 @@
-#import "aabb.h"
-#import "interval.h"
-#import "hittable.h"
+#include "aabb.h"
+#include "../core/interval.h"
 
 
 aabb aabb_create_from_interval(interval x, interval y, interval z) {
@@ -36,12 +35,6 @@ aabb aabb_add(aabb box0, aabb box1) {
   box_out.y = interval_enclose(box0.y, box1.y);
   box_out.z = interval_enclose(box0.z, box1.z);
   return box_out;
-}
-
-interval axis_interval(aabb* bb, int n) {
-  if (n == 1) return bb->y;
-  if (n == 2) return bb->z;
-  return bb->x;
 }
 
 bool aabb_hit(aabb* bb ,ray r, interval ray_t) {

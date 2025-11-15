@@ -2,8 +2,8 @@
 #define BVH_H
 
 #include "aabb.h"
-#include "hittable.h"
-#include "hittable_list.h"
+#include "../core/hittable.h"
+#include "../core/hittable_list.h"
 #include <stddef.h>
 
 typedef struct {
