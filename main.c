@@ -76,11 +76,10 @@ int main() {
   cam.vfov              = 20;
   cam.lookfrom          = vec3_create(13, 2, 3);
   cam.lookat            = vec3_create(0, 0, 0);
-  cam.vup               = vec3_create(0, 1, 0);
+  cam.vup               = vec3_create(0, -1, 0);
   cam.defocus_angle     = 0.6;
   cam.focus_dist        = 10.0;
 
-  camera_diagnostics(&cam);
 
   camera_initialize(&cam);
 

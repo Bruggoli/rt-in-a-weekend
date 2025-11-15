@@ -46,14 +46,10 @@ void render(hittable* world, camera* cam) {
 void camera_initialize(camera* c) {
 
   // Calculate image height and ensure > 1
-  fprintf(stderr, "%d\n", c->image_height);
-  fprintf(stderr, "%d\n", c->image_width);
   int image_height = (int)(c->image_width / c->aspect_ratio);
   c->image_height = (image_height < 1) ? 1 : image_height;
   c->pixel_samples_scale = 1.0 / c->samples_per_pixel;
   c->center = c->lookfrom;
-  fprintf(stderr, "%d\n", c->image_height);
-  fprintf(stderr, "%d\n", c->image_width);
   // Determine viewport dimensions.
   // double focal_length = vec3_length(vec3_sub(c->lookfrom, c->lookat));
   double theta = degrees_to_radians(c->vfov);  // <-- c->vfov
@@ -115,7 +111,8 @@ color ray_color(ray r, int depth, hittable* world) {
   double a = 0.5 * (unit_direction.e[1] + 1.0);
   return 
     vec3_add(
-      vec3_scale(vec3_create(1.0, 1.0, 1.0), (1.0-a)), 
+      vec3_scale(vec3_create(0.2, 1.0, 1.0), (1.0-a)), 
+
       vec3_scale(vec3_create(0.5, 0.7, 1.0), a)
     );
 }

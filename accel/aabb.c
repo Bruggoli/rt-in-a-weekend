@@ -4,26 +4,22 @@
 
 aabb aabb_create_from_interval(interval x, interval y, interval z) {
   
-  fprintf(stderr, "creating aabb from interval...\n");
   aabb bb;
 
   bb.x = x;
   bb.y = y;
   bb.z = z;
 
-  fprintf(stderr, "created aabb from interval!\n");
   return bb;
 }
 
 aabb aabb_create_from_point(point3 a, point3 b) {
-  fprintf(stderr, "creating aabb from point...\n");
   aabb bb;
 
   bb.x = (a.e[0] <= b.e[0] ? interval_create(a.e[0], b.e[0]) : interval_create(b.e[0], a.e[0]));
   bb.y = (a.e[1] <= b.e[1] ? interval_create(a.e[1], b.e[1]) : interval_create(b.e[1], a.e[1]));
   bb.z = (a.e[2] <= b.e[2] ? interval_create(a.e[2], b.e[2]) : interval_create(b.e[2], a.e[2]));
 
-  fprintf(stderr, "created aabb from point!\n");
   return bb;
 }
 

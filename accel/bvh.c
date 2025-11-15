@@ -12,7 +12,6 @@ int box_z_compare(const void* a, const void* b);
 
 hittable* bvh_node_create(hittable** objects, size_t start, size_t end) {
 
-  fprintf(stderr, "Creating bvh_node...\n");
 
   hittable* h = malloc(sizeof(hittable));
   bvh_node* n = malloc(sizeof(bvh_node));
@@ -32,7 +31,6 @@ hittable* bvh_node_create(hittable** objects, size_t start, size_t end) {
                                 : box_z_compare;
 
   size_t object_span = end - start;
-  fprintf(stderr, "sorted object array...\n");
 
   if (object_span == 1) {
     n->left = n->right = objects[start];
@@ -41,7 +39,6 @@ hittable* bvh_node_create(hittable** objects, size_t start, size_t end) {
     n->right = objects[start + 1];
   } else {
     qsort(&objects[start], object_span, sizeof(hittable*), comparator);
-    fprintf(stderr, "sorted object array...\n");
 
     size_t mid = start + object_span / 2;
     n->left = bvh_node_create(objects, start, mid);
@@ -54,7 +51,6 @@ hittable* bvh_node_create(hittable** objects, size_t start, size_t end) {
 }
 
 hittable* bvh_node_create_range(hittable_list* list) {
-  fprintf(stderr, "Creating bvh_node...\n");
   return bvh_node_create(list->objects, 0, list->count);
 }
 
@@ -87,8 +83,6 @@ int box_compare(const void* a, const void* b, int axis_index) {
   }
   aabb a_bb = ha->bounding_box(ha);
   aabb b_bb = hb->bounding_box(hb);
-  aabb_print(stderr, a_bb);
-  aabb_print(stderr, b_bb);
 
   interval a_axis_interval = axis_interval(&a_bb, axis_index);
   interval b_axis_interval = axis_interval(&b_bb, axis_index);

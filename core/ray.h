@@ -12,7 +12,10 @@ typedef struct {
 ray ray_create(point3 origin, vec3 direction, double time);
 point3 ray_origin(ray r);
 vec3 ray_direction(ray r);
-point3 ray_at(ray r, double t);
+
+static inline point3 ray_at(ray r, double t){
+  return vec3_add(r.orig, vec3_scale(r.dir, t));
+}
 void ray_print(FILE* out, ray r);
 double time(ray r);
 

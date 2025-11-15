@@ -17,9 +17,6 @@ vec3 ray_direction(ray r){
   return r.dir;
 }
 
-point3 ray_at(ray r, double t){
-  return vec3_add(r.orig, vec3_scale(r.dir, t));
-}
 
 double time(ray r) {
   return r.tm;

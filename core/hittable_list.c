@@ -9,7 +9,6 @@
 #define INITIAL_CAPACITY 10
 
 hittable* hittable_list_create(void) {
-  fprintf(stderr, "Creating hittable list...\n");
   hittable* h = malloc(sizeof(hittable));
   hittable_list* list = malloc(sizeof(hittable_list));
   list->capacity = INITIAL_CAPACITY;
@@ -28,7 +27,6 @@ hittable* hittable_list_create(void) {
 }
 
 void hittable_list_add(hittable* h, hittable* object) {
-  fprintf(stderr, "Adding to hittable_list...\n");
   hittable_list* list = (hittable_list*) h->data;
 
   // checks if cap is full
@@ -51,13 +49,10 @@ void hittable_list_add(hittable* h, hittable* object) {
     return;
   }
 
-  fprintf(stderr, "calling bounding_box\n");
   list->bbox = aabb_add(list->bbox, object->bounding_box(object));
   fflush(stderr); 
-  fprintf(stderr, "Checkpoint!\n");
   // Adds the objects to the list, incrementing count after
   list->objects[list->count++] = object;
-  fprintf(stderr, "Added to hittable_list!\n");
 }
 
 void hittable_list_clear(hittable_list *list) {
@@ -86,7 +81,6 @@ bool hittable_list_hit(hittable* self, ray r, interval ray_t, hit_record *rec) {
 }
 
 aabb hittable_list_bounding_box(hittable* self) {
-  fprintf(stderr, "Creating hlbb..\n");
   hittable_list* list = (hittable_list*)self->data;
 
   return list->bbox;
