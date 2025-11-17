@@ -30,6 +30,13 @@ color image_texture_value_fn(texture* tx, double u, double v, point3 p) {
 
   unsigned char* pixel = pixel_data(&it->image, i, j);
 
+  // Debug: print first few pixels
+  static int count = 0;
+  if (count < 500 && count < 510) {
+    fprintf(stderr, "Pixel %d at (%d,%d): R=%d G=%d B=%d\n", 
+            count++, i, j, pixel[0], pixel[1], pixel[2]);
+  }
+
   double color_scale = 1.0 / 255.0;
   return color_create(color_scale*pixel[0], color_scale*pixel[1], color_scale*pixel[2]);
 }

@@ -12,7 +12,6 @@
 
 typedef struct rtw_image {
   int             bytes_per_pixel;
-  float          *fdata;
   unsigned char  *bdata;
   int             image_width,
                   image_height,

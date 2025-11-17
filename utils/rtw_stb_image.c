@@ -30,7 +30,7 @@ rtw_image* rtw_image_create(char* filename){
 
   snprintf(path, sizeof(path), "%s%s", imagedir, filename);
   // calls to load image in if condition
-  if (!rtw_image_load(ri, "./resources/earthmap.jpg")) {
+  if (!rtw_image_load(ri, path)) {
     fprintf(stderr, "ERROR: rtw_image EMPTY, check if RTW_IMAGES is specified\nRTW_IMAGES: %s\n", path);
     return NULL;
   }
@@ -40,24 +40,27 @@ rtw_image* rtw_image_create(char* filename){
 
 bool rtw_image_load(rtw_image* ri, char* filename){
   int n = ri->bytes_per_pixel;
-  ri->fdata = stbi_loadf(filename, &ri->image_width, &ri->image_height, &n, ri->bytes_per_pixel);
-  fprintf(stderr, "ri->fdata: %f", *ri->fdata);
-  
-  if (!ri->fdata){
-    fprintf(stderr, "ri->fdata empty!");
+  ri->bdata = stbi_load(filename, &ri->image_width, &ri->image_height, &n, ri->bytes_per_pixel);
+  fprintf(stderr, "First 10 float values: ");
+  for (int i = 0; i < 200; i++) {
+    fprintf(stderr, "%c", ri->bdata[i]);
+  }
+  fprintf(stderr, "\n");
+  if (!ri->bdata){
+    fprintf(stderr, "ri->fdata empty!\n");
     return false;
   }
 
   ri->bytes_per_scanline = ri->image_width * ri->bytes_per_pixel;
-  convert_to_bytes(ri);
+  //convert_to_bytes(ri);
   return true;
 }
 
 int rtw_image_width(rtw_image* ri) {
-  return ri->fdata == NULL ? 0 : ri->image_width;
+  return ri->bdata == NULL ? 0 : ri->image_width;
 }
 int rtw_image_height(rtw_image* ri) {
-  return ri->fdata == NULL ? 0 : ri->image_height;
+  return ri->bdata == NULL ? 0 : ri->image_height;
 }
 
 unsigned char* pixel_data(rtw_image* ri, int x, int y) {
