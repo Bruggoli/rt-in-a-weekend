@@ -14,6 +14,7 @@ TARGET = main
 make: $(OBJ)
 			$(CC) $(LIBS) $(OBJ) -o $(TARGET) $(CFLAGS)
 
+run: export RTW_IMAGES = ./resources/
 run: $(TARGET)
 	   ./$(TARGET) > $(IMG_OUT)
 

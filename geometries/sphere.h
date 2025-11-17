@@ -15,6 +15,7 @@ typedef struct {
 
 hittable* sphere_create(point3 center, double radius, material* mat);
 hittable* sphere_create_moving(point3 center1, point3 center2, double radius, material* mat);
+void get_sphere_uv(point3 p, double* u, double* v);
 aabb sphere_bounding_box(hittable* self);
 void sphere_destroy(hittable* h);
 

@@ -7,10 +7,11 @@
 
 bool lambertian_scatter(material* self, ray r_in, hit_record* rec, vec3* attenuation, ray* scattered);
 
-material* mat_lambertian(color albedo) {
+
+material* mat_lambertian_tx(texture* tx) {
   material* m = malloc(sizeof(material));
   lambertian* l = malloc(sizeof(lambertian));
-  l->albedo = albedo;
+  l->tx = tx;
 
   m->data = l;
   m->scatter = lambertian_scatter;
@@ -18,7 +19,9 @@ material* mat_lambertian(color albedo) {
   return m;
 }
 
-
+material* mat_lambertian(color albedo) {
+  return mat_lambertian_tx(solid_color_albedo(albedo));
+}
 
 bool lambertian_scatter(material* self, ray r_in, hit_record* rec, color* attenuation, ray* scattered) {
   vec3 scatter_direction = vec3_add(rec->normal, vec3_random_unit_vector());
@@ -31,6 +34,6 @@ bool lambertian_scatter(material* self, ray r_in, hit_record* rec, color* attenu
 
   lambertian* l = (lambertian*)self->data;
   // Same here!
-  *attenuation = l->albedo;
+  *attenuation = l->tx->value(l->tx, rec->u, rec->v, rec->p);
   return true;
 }

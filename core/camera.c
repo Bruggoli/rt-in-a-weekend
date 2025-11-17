@@ -51,7 +51,7 @@ void camera_initialize(camera* c) {
   c->pixel_samples_scale = 1.0 / c->samples_per_pixel;
   c->center = c->lookfrom;
   // Determine viewport dimensions.
-  // double focal_length = vec3_length(vec3_sub(c->lookfrom, c->lookat));
+
   double theta = degrees_to_radians(c->vfov);  // <-- c->vfov
   double h = tan(theta / 2);
   double viewport_height = 2.0 * h * c->focus_dist;
@@ -72,12 +72,6 @@ void camera_initialize(camera* c) {
   p0 = vec3_sub(p0, vec3_div(viewport_u, 2.0));
   p0 = vec3_sub(p0, vec3_div(viewport_v, 2.0));
   point3 viewport_upper_left = p0;
-  
-  // calculate the position of the top left pixel
-  // temp calc to avoid nesting 1
-  // vec3 upper_left_calc_1= vec3_sub(camera_center, vec3_create(0, 0, focus_dist));
-  // temp calc 2
-  // vec3 upper_left_calc_2 = vec3_add(vec3_div(viewport_u, 2), vec3_div(viewport_v, 2));
   
   
   vec3 pixel_delta_scaled = vec3_scale(vec3_add(c->pixel_delta_u, c->pixel_delta_v), 0.5);

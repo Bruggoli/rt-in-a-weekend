@@ -3,6 +3,7 @@
 #include "../core/ray.h"
 #include "../core/vec3.h"
 #include "../accel/aabb.h"
+#include "../utils/rtweekend.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -34,6 +35,7 @@ hittable* sphere_create(point3 static_center, double radius, material* mat) {
   return h;
 };
 
+
 hittable* sphere_create_moving(point3 center1, point3 center2, double radius, material* mat) {
   hittable* h = malloc(sizeof(hittable));
   sphere* s = malloc(sizeof(sphere));
@@ -59,6 +61,14 @@ hittable* sphere_create_moving(point3 center1, point3 center2, double radius, ma
 aabb sphere_bounding_box(hittable* self) {
   sphere* s = self->data;
   return s->bbox;
+}
+
+void get_sphere_uv(point3 p, double* u, double* v) {
+  double theta = acos(-p.e[1]);
+  double phi = atan2(-p.e[2], p.e[0]) + PI;
+
+  *u = phi / (2*PI);
+  *v = theta / PI;
 }
 
 bool sphere_hit(hittable* self, ray r, interval ray_t, hit_record* rec) {
@@ -90,6 +100,7 @@ bool sphere_hit(hittable* self, ray r, interval ray_t, hit_record* rec) {
   rec->p = ray_at(r, root);
   vec3 outward_normal = vec3_div(vec3_sub(rec->p, current_center), s->radius);
   set_face_normal(rec, r, outward_normal); 
+  get_sphere_uv(outward_normal, &rec->u, &rec->v);
   rec->mat = s->mat;
 
   return true;
