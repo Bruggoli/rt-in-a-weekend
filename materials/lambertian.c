@@ -15,6 +15,7 @@ material* mat_lambertian_tx(texture* tx) {
 
   m->data = l;
   m->scatter = lambertian_scatter;
+  m->emit = material_emitted_default;
 
   return m;
 }

@@ -17,6 +17,7 @@ material* mat_dielectric(double refraction_index){
   d->refraction_index = refraction_index;
   m->data = d;
   m->scatter = dielectric_scatter;
+  m->emit = material_emitted_default;
 
   return m;
 }

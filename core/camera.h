@@ -3,6 +3,7 @@
 
 #include "hittable.h"
 #include "vec3.h"
+#include "color.h"
 
 typedef struct {
   int   image_height,           // rendered image height
@@ -24,6 +25,7 @@ typedef struct {
           vfov,                 // vertical FOV of camera
           defocus_angle,  // Variation angle of rays through each pixel
           focus_dist;     // Distance from camera lookfrom point to plane of perfect focus
+  color background;     // Scene background color
 } camera;
 
 void render(hittable* world, camera* cam);

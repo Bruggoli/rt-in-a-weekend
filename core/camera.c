@@ -22,6 +22,8 @@ point3  lookfrom          = (vec3){0, 0, 0};
 point3  lookat            = (vec3){0, 0,-1};
 point3  vup               = (vec3){0, 1, 0};
 
+color   background        = (vec3){0, 0, 0};
+
 
 void render(hittable* world, camera* cam) {
   
@@ -85,30 +87,27 @@ void camera_initialize(camera* c) {
 }
 
 color ray_color(ray r, int depth, hittable* world) {
+
   if (depth <= 0)
     return vec3_create(0, 0, 0);
 
   hit_record rec;
 
-  if (world->hit(world, r, interval_create(0.001, INFINITY), &rec)) {
-    ray scattered;
-    color attenuation;
-    if (rec.mat->scatter(rec.mat, r, &rec, &attenuation, &scattered)){
-      return vec3_mul(attenuation, ray_color(scattered, depth - 1, world));
-    }
-    return vec3_create(0, 0, 0);
+  if (!world->hit(world, r, interval_create(0.001, INFINITY), &rec))
+    return background;
+
+  ray scattered;
+  color attenuation;
+  color color_from_emission = rec.mat->emit(rec.mat, rec.u, rec.v, rec.p);
+
+
+  if (rec.mat->scatter(rec.mat, r, &rec, &attenuation, &scattered)){
+    return color_from_emission;
   }
-  
 
-  // Sky gradient
-  vec3 unit_direction = unit_vector(r.dir);
-  double a = 0.5 * (unit_direction.e[1] + 1.0);
-  return 
-    vec3_add(
-      vec3_scale(vec3_create(0.7, 1.0, 1.0), (1.0-a)), 
+  color color_from_scatter = vec3_mul(attenuation, ray_color(scattered, depth - 1, world));
 
-      vec3_scale(vec3_create(0.9, 0.7, 1.0), a)
-    );
+  return vec3_add(color_from_emission, color_from_scatter);
 }
 
 point3 defocus_disk_sample(camera* c) {

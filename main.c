@@ -3,6 +3,7 @@
 #include "core/hittable_list.h"
 #include "core/vec3.h"
 #include "core/camera.h"
+#include "materials/diffuse_light.h"
 #include "materials/lambertian.h"
 #include "materials/material.h"
 #include "materials/metal.h"
@@ -78,14 +79,18 @@ void bouncing_spheres() {
   world = new_world;
 
   camera cam;
+
   cam.aspect_ratio      = 16.0 / 9.0;
   cam.image_width       = 1200;
   cam.samples_per_pixel = 20;
   cam.max_depth         = 50;
+  cam.background        = color_create(0.70, 0.80, 1.00);
+
   cam.vfov              = 20;
   cam.lookfrom          = vec3_create(13, 2, 3);
   cam.lookat            = vec3_create(0, 0, 0);
   cam.vup               = vec3_create(0, 1, 0);
+  
   cam.defocus_angle     = 0.6;
   cam.focus_dist        = 10.0;
 
@@ -125,6 +130,7 @@ void checkered_spheres() {
   cam.image_width       = 800;
   cam.samples_per_pixel = 100;
   cam.max_depth         = 50;
+  cam.background        = color_create(0.70, 0.80, 1.00);
 
   cam.vfov              = 20;
   cam.lookfrom          = vec3_create(13, 2, 3);
@@ -156,6 +162,7 @@ void earth() {
   cam.image_width       = 800;
   cam.samples_per_pixel = 100;
   cam.max_depth         = 50;
+  cam.background        = color_create(0.70, 0.80, 1.00);
 
   cam.vfov              = 20;
   cam.lookfrom          = vec3_create(0, 0, 12);
@@ -191,6 +198,7 @@ void perlin_spheres() {
   cam.image_width       = 800;
   cam.samples_per_pixel = 100;
   cam.max_depth         = 50;
+  cam.background        = color_create(0.70, 0.80, 1.00);
 
   cam.vfov              = 20;
   cam.lookfrom          = vec3_create(13,2,3);
@@ -230,6 +238,7 @@ void quads() {
   cam.image_width       = 800;
   cam.samples_per_pixel = 100;
   cam.max_depth         = 50;
+  cam.background        = color_create(0.70, 0.80, 1.00);
 
   cam.vfov              = 80;
   cam.lookfrom          = vec3_create(0,0,9);
@@ -247,12 +256,50 @@ void quads() {
   }
 }
 
+void simple_light() {
+  hittable* world = hittable_list_create();
+
+  texture* pertext = noise_texture_create(4);
+  material* perlin_mat = mat_lambertian_tx(pertext);
+  
+  hittable_list_add(world, sphere_create(vec3_create(0, -1000, 0), 1000, perlin_mat));
+  hittable_list_add(world, sphere_create(vec3_create(0, 2, 0), 2, perlin_mat));
+
+  material* difflight = diffuse_light_create_color(color_create(4, 4, 4));
+  hittable_list_add(world, quad_create((point3){3, 1, -2}, vec3_create(2, 0, 0), vec3_create(0, 2, 2), difflight));
+
+  camera cam;
+  cam.aspect_ratio      = 16.0 / 9.0;
+  cam.image_width       = 800;
+  cam.samples_per_pixel = 100;
+  cam.max_depth         = 50;
+  cam.background        = color_create(0, 0, 0);
+
+  cam.vfov              = 20;
+  cam.lookfrom          = vec3_create(26,3,6);
+  cam.lookat            = vec3_create(0, 2, 0);
+  cam.vup               = vec3_create(0, 1, 0);
+  
+  cam.defocus_angle     = 0.0;
+  cam.focus_dist        = 10.0;
+
+
+  camera_initialize(&cam);
+
+  camera_diagnostics(&cam);
+  render(world, &cam);  
+  if (open_file("./image.ppm") == 1) {
+    fprintf(stderr, "Could not find picture in path");
+  }
+}
+
 int main() {
-  switch (5) {
+  switch (6) {
     case 1: bouncing_spheres(); break;
     case 2: checkered_spheres(); break;
     case 3: earth(); break;
     case 4: perlin_spheres(); break;
     case 5: quads(); break;
+    case 6: simple_light(); break;
   }
 }

@@ -15,6 +15,7 @@ material* mat_metal(color albedo, double fuzz) {
 
   m->data = met;
   m->scatter = metal_scatter;
+  m->emit = material_emitted_default;
 
   return m;
 }
