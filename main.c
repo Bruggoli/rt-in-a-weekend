@@ -7,11 +7,14 @@
 #include "materials/material.h"
 #include "materials/metal.h"
 #include "materials/dielectric.h"
+#include "textures/solid_color.h"
 #include "utils/rtweekend.h"
 #include "utils/open_rendered_image.h"
 #include "geometries/sphere.h"
 #include "textures/texture.h"
 #include "textures/checker_texture.h"
+#include "textures/noise_texture.h"
+#include "textures/perlin.h"
 #include "accel/bvh.h"
 #include "textures/image_texture.h"
 
@@ -145,9 +148,7 @@ void earth() {
 
   texture* earth_texture = image_texture_create("earthmap.jpg");
   material* earth_surface = mat_lambertian_tx(earth_texture);
-  hittable_list_add(world, sphere_create(vec3_create(0, -1, 0), 1, earth_surface));
-
-  hittable_list* world_data = (hittable_list*)world->data;
+  hittable_list_add(world, sphere_create(vec3_create(0, 0, 0), 1, earth_surface));
 
   camera cam;
   cam.aspect_ratio      = 16.0 / 9.0;
@@ -174,10 +175,44 @@ void earth() {
 
 }
 
+void perlin_spheres() {
+  render_noise_map("noise.ppm");
+  texture* pertext = noise_texture_create();
+  material* perlin_mat = mat_lambertian_tx(pertext);
+  
+  hittable* world = hittable_list_create();
+
+  hittable_list_add(world, sphere_create(vec3_create(0, -1000, 0), 1000, perlin_mat));
+  hittable_list_add(world, sphere_create(vec3_create(0, 2, 0), 2, perlin_mat));
+
+  camera cam;
+  cam.aspect_ratio      = 16.0 / 9.0;
+  cam.image_width       = 800;
+  cam.samples_per_pixel = 100;
+  cam.max_depth         = 50;
+
+  cam.vfov              = 20;
+  cam.lookfrom          = vec3_create(13,2,3);
+  cam.lookat            = vec3_create(0, 0, 0);
+  cam.vup               = vec3_create(0, 1, 0);
+  
+  cam.defocus_angle     = 0.6;
+  cam.focus_dist        = 10.0;
+
+
+  camera_initialize(&cam);
+
+  camera_diagnostics(&cam);
+  render(world, &cam);  
+  if (open_file("./image.ppm") == 1) {
+    fprintf(stderr, "Could not find picture in path");
+  }}
+
 int main() {
-  switch (3) {
+  switch (4) {
     case 1: bouncing_spheres(); break;
     case 2: checkered_spheres(); break;
     case 3: earth(); break;
+    case 4: perlin_spheres(); break;
   }
 }

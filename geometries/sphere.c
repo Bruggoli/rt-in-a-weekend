@@ -102,7 +102,6 @@ bool sphere_hit(hittable* self, ray r, interval ray_t, hit_record* rec) {
   set_face_normal(rec, r, outward_normal); 
   get_sphere_uv(outward_normal, &rec->u, &rec->v);
   rec->mat = s->mat;
-
   return true;
 }
 

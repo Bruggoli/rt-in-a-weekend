@@ -5,7 +5,7 @@ deps = ./core/*.h ./accel/*.h ./utils/*.h ./textures/*.h ./materials/*.h ./geome
 
 OBJ = main.c ./core/*.c ./accel/*.c ./utils/*.c ./textures/*.c ./materials/*.c ./geometries/*.c
 
-LIBS=-lm
+LIBS= -lm
 
 IMG_OUT = image.ppm
 

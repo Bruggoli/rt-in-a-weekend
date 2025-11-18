@@ -105,9 +105,9 @@ color ray_color(ray r, int depth, hittable* world) {
   double a = 0.5 * (unit_direction.e[1] + 1.0);
   return 
     vec3_add(
-      vec3_scale(vec3_create(0.2, 1.0, 1.0), (1.0-a)), 
+      vec3_scale(vec3_create(0.7, 1.0, 1.0), (1.0-a)), 
 
-      vec3_scale(vec3_create(0.5, 0.7, 1.0), a)
+      vec3_scale(vec3_create(0.9, 0.7, 1.0), a)
     );
 }
 

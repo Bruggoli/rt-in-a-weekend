@@ -14,7 +14,6 @@ rtw_image* rtw_image_create(char* filename){
   rtw_image* ri = malloc(sizeof(rtw_image));
 
   ri->bytes_per_pixel = 3;
-  ri->fdata = NULL;
   ri->bdata = NULL;
   
   char* imagedir = getenv("RTW_IMAGES");
@@ -47,7 +46,7 @@ bool rtw_image_load(rtw_image* ri, char* filename){
   }
   fprintf(stderr, "\n");
   if (!ri->bdata){
-    fprintf(stderr, "ri->fdata empty!\n");
+    fprintf(stderr, "ri->bdata empty!\n");
     return false;
   }
 
@@ -97,6 +96,7 @@ static unsigned char float_to_byte(float value) {
   return (unsigned char)256.0 * value;
 }
 
+/* not in use, jpg is sRGB and does not need conversion
 static void convert_to_bytes(rtw_image* ri) {
   int total_bytes = ri->image_width * ri->image_height * ri->bytes_per_pixel;
   ri->bdata = malloc(total_bytes);
@@ -109,7 +109,7 @@ static void convert_to_bytes(rtw_image* ri) {
   for (int i = 0; i < total_bytes; i++, fptr++, bptr++)
     *bptr = float_to_byte(*fptr);
 } 
-
+*/
 // Restore MSVC compiler warnings
 #ifdef _MSC_VER
     #pragma warning (pop)
