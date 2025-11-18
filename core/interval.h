@@ -21,6 +21,6 @@ bool interval_surrounds(interval i, double x);
 
 double clamp(interval i, double x);
 
-interval expand(interval i, double delta);
+interval interval_expand(interval i, double delta);
 
 #endif

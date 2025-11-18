@@ -29,8 +29,6 @@ static inline interval axis_interval(aabb* bb, int n) {
 int longest_axis(aabb* self);
 
 static inline bool aabb_hit(aabb* bb ,ray r, interval ray_t) {
-
-
   point3  ray_orig  = r.orig;
   vec3    ray_dir   = r.dir;
 
@@ -56,6 +54,7 @@ static inline bool aabb_hit(aabb* bb ,ray r, interval ray_t) {
 
   return true;
 }
+
 void aabb_print(FILE* out, aabb bb);
 
 #endif

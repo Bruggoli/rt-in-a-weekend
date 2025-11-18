@@ -38,7 +38,7 @@ double clamp(interval i, double x) {
   return x;
 }
 
-interval expand(interval i, double delta) {
+interval interval_expand(interval i, double delta) {
   double padding = delta / 2;
   return interval_create(i.min - padding, i.max + padding);
 }

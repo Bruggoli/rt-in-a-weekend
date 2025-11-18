@@ -11,6 +11,7 @@
 #include "utils/rtweekend.h"
 #include "utils/open_rendered_image.h"
 #include "geometries/sphere.h"
+#include "geometries/quad.h"
 #include "textures/texture.h"
 #include "textures/checker_texture.h"
 #include "textures/noise_texture.h"
@@ -206,13 +207,52 @@ void perlin_spheres() {
   render(world, &cam);  
   if (open_file("./image.ppm") == 1) {
     fprintf(stderr, "Could not find picture in path");
-  }}
+  }
+}
+
+void quads() {
+  hittable* world = hittable_list_create();
+
+  material* left_red     = mat_lambertian(color_create(1.0, 0.2, 0.2));
+  material* back_green   = mat_lambertian(color_create(0.2, 1.0, 0.2));
+  material* right_blue   = mat_lambertian(color_create(0.2, 0.2, 1.0));
+  material* upper_orange = mat_lambertian(color_create(1.0, 0.5, 0.0));
+  material* lower_teal   = mat_lambertian(color_create(0.2, 0.8, 0.8));
+
+  hittable_list_add(world, quad_create((point3){-3, -2, 5}, vec3_create(0, 0, -4), vec3_create(0, 4, 0), left_red));
+  hittable_list_add(world, quad_create(vec3_create(-2,-2, 0), vec3_create(4, 0, 0), vec3_create(0, 4, 0), back_green));
+  hittable_list_add(world, quad_create(vec3_create( 3,-2, 1), vec3_create(0, 0, 4), vec3_create(0, 4, 0), right_blue));
+  hittable_list_add(world, quad_create(vec3_create(-2, 3, 1), vec3_create(4, 0, 0), vec3_create(0, 0, 4), upper_orange));
+  hittable_list_add(world, quad_create(vec3_create(-2,-3, 5), vec3_create(4, 0, 0), vec3_create(0, 0,-4), lower_teal));
+
+  camera cam;
+  cam.aspect_ratio      = 16.0 / 9.0;
+  cam.image_width       = 800;
+  cam.samples_per_pixel = 100;
+  cam.max_depth         = 50;
+
+  cam.vfov              = 80;
+  cam.lookfrom          = vec3_create(0,0,9);
+  cam.lookat            = vec3_create(0, 0, 0);
+  cam.vup               = vec3_create(0, 1, 0);
+  
+  cam.defocus_angle     = 0.0;
+  cam.focus_dist        = 10.0;
+
+  camera_initialize(&cam);
+  render(world, &cam);  
+
+  if (open_file("./image.ppm") == 1) {
+    fprintf(stderr, "Could not find picture in path");
+  }
+}
 
 int main() {
-  switch (4) {
+  switch (5) {
     case 1: bouncing_spheres(); break;
     case 2: checkered_spheres(); break;
     case 3: earth(); break;
     case 4: perlin_spheres(); break;
+    case 5: quads(); break;
   }
 }

@@ -1,6 +1,7 @@
 #include "aabb.h"
 #include "../core/interval.h"
 
+static void pad_to_minimums(aabb* bbox);
 
 aabb aabb_create_from_interval(interval x, interval y, interval z) {
   
@@ -10,6 +11,7 @@ aabb aabb_create_from_interval(interval x, interval y, interval z) {
   bb.y = y;
   bb.z = z;
 
+  pad_to_minimums(&bb);
   return bb;
 }
 
@@ -20,6 +22,7 @@ aabb aabb_create_from_point(point3 a, point3 b) {
   bb.y = (a.e[1] <= b.e[1] ? interval_create(a.e[1], b.e[1]) : interval_create(b.e[1], a.e[1]));
   bb.z = (a.e[2] <= b.e[2] ? interval_create(a.e[2], b.e[2]) : interval_create(b.e[2], a.e[2]));
 
+  pad_to_minimums(&bb);
   return bb;
 }
 
@@ -49,4 +52,12 @@ void aabb_print(FILE* out, aabb bb) {
           bb.x.min, bb.x.max,
           bb.y.min, bb.y.max,
           bb.z.min, bb.z.max);
+}
+
+static void pad_to_minimums(aabb* bbox) {
+  double delta = 0.0001;
+  if (interval_size(bbox->x) < delta) bbox->x = interval_expand(bbox->x, delta);
+  if (interval_size(bbox->y) < delta) bbox->y = interval_expand(bbox->y, delta);
+  if (interval_size(bbox->z) < delta) bbox->z = interval_expand(bbox->z, delta);
+    
 }
