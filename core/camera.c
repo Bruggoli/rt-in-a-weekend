@@ -22,8 +22,6 @@ point3  lookfrom          = (vec3){0, 0, 0};
 point3  lookat            = (vec3){0, 0,-1};
 point3  vup               = (vec3){0, 1, 0};
 
-color   background        = (vec3){0, 0, 0};
-
 
 void render(hittable* world, camera* cam) {
   
@@ -35,7 +33,7 @@ void render(hittable* world, camera* cam) {
       color pixel_color = vec3_create(0, 0, 0);
       for (int sample = 0; sample < cam->samples_per_pixel; sample++) {
         ray r = camera_get_ray(cam, i, j);
-        pixel_color = vec3_add(pixel_color, ray_color(r, cam->max_depth, world));
+        pixel_color = vec3_add(pixel_color, ray_color(r, cam->max_depth, world, cam->background));
       }
     write_color(stdout, vec3_scale( pixel_color, cam->pixel_samples_scale));
     }
@@ -86,7 +84,7 @@ void camera_initialize(camera* c) {
 
 }
 
-color ray_color(ray r, int depth, hittable* world) {
+color ray_color(ray r, int depth, hittable* world, color background) {
 
   if (depth <= 0)
     return vec3_create(0, 0, 0);
@@ -101,11 +99,11 @@ color ray_color(ray r, int depth, hittable* world) {
   color color_from_emission = rec.mat->emit(rec.mat, rec.u, rec.v, rec.p);
 
 
-  if (rec.mat->scatter(rec.mat, r, &rec, &attenuation, &scattered)){
+  if (!rec.mat->scatter(rec.mat, r, &rec, &attenuation, &scattered)){
     return color_from_emission;
   }
 
-  color color_from_scatter = vec3_mul(attenuation, ray_color(scattered, depth - 1, world));
+  color color_from_scatter = vec3_mul(attenuation, ray_color(scattered, depth - 1, world, background));
 
   return vec3_add(color_from_emission, color_from_scatter);
 }

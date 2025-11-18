@@ -32,7 +32,7 @@ void render(hittable* world, camera* cam);
 
 void camera_initialize(camera* cam);
 
-vec3 ray_color(ray r, int max_depth, hittable* world);
+color ray_color(ray r, int depth, hittable* world, color background);
 
 ray camera_get_ray(camera* c, double i, double j);
 

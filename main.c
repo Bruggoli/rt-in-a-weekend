@@ -266,7 +266,21 @@ void simple_light() {
   hittable_list_add(world, sphere_create(vec3_create(0, 2, 0), 2, perlin_mat));
 
   material* difflight = diffuse_light_create_color(color_create(4, 4, 4));
-  hittable_list_add(world, quad_create((point3){3, 1, -2}, vec3_create(2, 0, 0), vec3_create(0, 2, 2), difflight));
+  hittable_list_add(world, quad_create((point3){3, 1, -2}, vec3_create(2, 0, 0), vec3_create(0, 2, 0), difflight));
+  hittable_list_add(world, sphere_create(vec3_create(-3, 12, 0), 3, difflight));
+
+  fprintf(stderr, "Finished adding objects to world\n");
+
+// set up bvh
+  hittable_list* world_data = (hittable_list*)world->data;
+
+  hittable* bvh_root = bvh_node_create_range(world_data);
+  // We need to overwrite the old world instead of just adding the bvh root to the old world
+  // BVH allegedly already contains all the objects PLUS the bounding boxes
+  hittable* new_world = hittable_list_create();
+  hittable_list_add(new_world, bvh_root);
+  world = new_world;
+
 
   camera cam;
   cam.aspect_ratio      = 16.0 / 9.0;
@@ -293,13 +307,66 @@ void simple_light() {
   }
 }
 
+void cornell_box() {
+  hittable* world = hittable_list_create();
+
+material* red   = mat_lambertian(color_create(.65, .05, .05));
+material* white = mat_lambertian(color_create(.73, .73, .73));
+material* green = mat_lambertian(color_create(.12, .45, .15));
+material* light = diffuse_light_create_color(color_create(15, 15, 15));
+
+hittable_list_add(world, quad_create(vec3_create(555,0,0), vec3_create(0,555,0), vec3_create(0,0,555), green));
+hittable_list_add(world, quad_create(vec3_create(0,0,0), vec3_create(0,555,0), vec3_create(0,0,555), red));
+hittable_list_add(world, quad_create(vec3_create(343, 554, 332), vec3_create(-130,0,0), vec3_create(0,0,-105), light));
+hittable_list_add(world, quad_create(vec3_create(0,0,0), vec3_create(555,0,0), vec3_create(0,0,555), white));
+hittable_list_add(world, quad_create(vec3_create(555,555,555), vec3_create(-555,0,0), vec3_create(0,0,-555), white));
+hittable_list_add(world, quad_create(vec3_create(0,0,555), vec3_create(555,0,0), vec3_create(0,555,0), white));
+  fprintf(stderr, "Finished adding objects to world\n");
+
+// set up bvh
+  hittable_list* world_data = (hittable_list*)world->data;
+
+  hittable* bvh_root = bvh_node_create_range(world_data);
+  // We need to overwrite the old world instead of just adding the bvh root to the old world
+  // BVH allegedly already contains all the objects PLUS the bounding boxes
+  hittable* new_world = hittable_list_create();
+  hittable_list_add(new_world, bvh_root);
+  world = new_world;
+
+
+  camera cam;
+  cam.aspect_ratio      = 1;
+  cam.image_width       = 600;
+  cam.samples_per_pixel = 200;
+  cam.max_depth         = 50;
+  cam.background        = color_create(0, 0, 0);
+
+  cam.vfov              = 40;
+  cam.lookfrom          = vec3_create(278, 278, -800);
+  cam.lookat            = vec3_create(278, 278, 0);
+  cam.vup               = vec3_create(0, 1, 0);
+  
+  cam.defocus_angle     = 0.0;
+  cam.focus_dist        = 10.0;
+
+
+  camera_initialize(&cam);
+
+  camera_diagnostics(&cam);
+  render(world, &cam);  
+  if (open_file("./image.ppm") == 1) {
+    fprintf(stderr, "Could not find picture in path");
+  }
+}
+
 int main() {
-  switch (6) {
+  switch (7) {
     case 1: bouncing_spheres(); break;
     case 2: checkered_spheres(); break;
     case 3: earth(); break;
     case 4: perlin_spheres(); break;
     case 5: quads(); break;
     case 6: simple_light(); break;
+    case 7: cornell_box(); break;
   }
 }
