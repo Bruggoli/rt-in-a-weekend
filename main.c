@@ -177,7 +177,7 @@ void earth() {
 
 void perlin_spheres() {
   render_noise_map("noise.ppm");
-  texture* pertext = noise_texture_create();
+  texture* pertext = noise_texture_create(4);
   material* perlin_mat = mat_lambertian_tx(pertext);
   
   hittable* world = hittable_list_create();

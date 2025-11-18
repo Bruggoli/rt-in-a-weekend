@@ -6,9 +6,10 @@
 
 typedef struct {
   perlin noise;
+  double scale;
 } noise_texture;
 
-texture* noise_texture_create();
+texture* noise_texture_create(double scale);
 
 color noise_texture_value(texture* self, double u, double v, point3 p);
 

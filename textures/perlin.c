@@ -6,13 +6,14 @@
 
 static void perlin_generate_perm(int* p);
 static void permute(int* p, int n);
+static double perlin_interp(vec3 c[2][2][2], double u, double v, double w);
 
 perlin* perlin_create() {
   fprintf(stderr, "Initializing perlin...\n");
   perlin* p = malloc(sizeof(perlin));
 
   for (int i = 0; i < POINT_COUNT; i++) {
-    p->randfloat[i] = random_double();
+    p->randvec[i] = unit_vector(vec3_random_range(-1, 1));
   }
 
   perlin_generate_perm(p->perm_x);
@@ -22,23 +23,22 @@ perlin* perlin_create() {
   return p;
 }
 
-double noise_create(perlin* per, point3 p) {
-  double scale = 4.0;
-  int i = (int)(scale*p.e[0]) & 255;
-  int j = (int)(scale*p.e[1]) & 255;
-  int k = (int)(scale*p.e[2]) & 255;
 
-  int index = per->perm_x[i] ^ per->perm_y[j] ^ per->perm_z[k];
-  static int count = 0;
-  if (count < 10) {
-    fprintf(stderr, "perm_x[%d]=%d, perm_y[%d]=%d, perm_z[%d]=%d -> XOR=%d\n",
-            i, per->perm_x[i], j, per->perm_y[j], k, per->perm_z[k],
-            per->perm_x[i] ^ per->perm_y[j] ^ per->perm_z[k]);
-    count++;
-  }  
+double turb_create(perlin* per, point3 p, int depth) {
+  double accum = 0.0;
+  point3 temp_p = p;
+  double weight = 1.0;
 
-  return per->randfloat[index];
+  for (int i = 0; i < depth; i++) {
+    accum += weight * noise_create(per, temp_p);
+    weight *= 0.5;
+    temp_p = vec3_scale(temp_p, 2);
+  }
+
+  return fabs(accum);
 }
+
+
 
 static void perlin_generate_perm(int* p) {
   for (int i = 0; i < POINT_COUNT; i++) {
@@ -46,6 +46,32 @@ static void perlin_generate_perm(int* p) {
   }
 
   permute(p, POINT_COUNT);
+}
+
+double noise_create(perlin* per, point3 p) {
+  double u = p.e[0] - floor(p.e[0]);
+  double v = p.e[1] - floor(p.e[1]);
+  double w = p.e[2] - floor(p.e[2]);
+
+
+  int i = (int)floor(p.e[0]);
+  int j = (int)floor(p.e[1]);
+  int k = (int)floor(p.e[2]);
+  vec3 c[2][2][2];
+
+  for (int di = 0; di < 2; di++) {
+    for (int dj = 0; dj < 2; dj++) {
+      for (int dk = 0; dk < 2; dk++) {
+        c[di][dj][dk] = per->randvec[
+          per->perm_x[(i+di) & 255] ^
+          per->perm_y[(j+dj) & 255] ^
+          per->perm_z[(k+dk) & 255]
+        ];
+      }
+    }
+  }
+
+  return perlin_interp(c, u, v, w);
 }
 
 static void permute(int* p, int n) {
