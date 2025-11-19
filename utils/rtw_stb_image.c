@@ -20,14 +20,12 @@ rtw_image* rtw_image_create(char* filename){
 
   if (!imagedir) {
     fprintf(stderr, "ERROR: RTW_IMAGES not set\n");
-    free(ri);
-    return NULL;
   }
 
   // i love c
   char path[512];
 
-  snprintf(path, sizeof(path), "%s%s", imagedir, filename);
+  snprintf(path, sizeof(path), "%s",  filename);
   // calls to load image in if condition
   if (!rtw_image_load(ri, path)) {
     fprintf(stderr, "ERROR: rtw_image EMPTY, check if RTW_IMAGES is specified\nRTW_IMAGES: %s\n", path);

@@ -426,8 +426,90 @@ void cornell_smoke() {
   }
 }
 
+void final_scene(int image_width, int samples_per_pixel, int max_depth) {
+  hittable* boxes1 = hittable_list_create();
+  material* ground = mat_lambertian(color_create(0.48, 0.83, 0.53));
+
+  int boxes_per_side = 20;
+  for (int i = 0; i < boxes_per_side; i++) {
+    for (int j = 0; j < boxes_per_side; j++) {
+      double w = 100.0;
+      double x0 = -1000.0 + i*w;
+      double z0 = -1000.0 + j*w;
+      double y0 = 0.0;
+      double x1 = x0 + w;
+      double y1 = random_double_range(1, 101);
+      double z1 = z0 + w;
+
+      hittable_list_add(boxes1, create_box(vec3_create(x0,y0,z0), vec3_create(x1,y1,z1), ground));
+    }
+  }
+
+  hittable* world = hittable_list_create();
+
+  hittable_list* boxes1_data = (hittable_list*)boxes1->data;
+  hittable* bvh1 = bvh_node_create_range(boxes1_data);
+  hittable_list_add(world, bvh1);
+
+  material* light = diffuse_light_create_color(color_create(7, 7, 7));
+  hittable_list_add(world, quad_create(vec3_create(123,554,147), vec3_create(300,0,0), vec3_create(0,0,265), light));
+
+  point3 center1 = vec3_create(400, 400, 200);
+  point3 center2 = vec3_add(center1, vec3_create(30,0,0));
+  material* sphere_material = mat_lambertian(color_create(0.7, 0.3, 0.1));
+  hittable_list_add(world, sphere_create_moving(center1, center2, 50, sphere_material));
+
+  hittable_list_add(world, sphere_create(vec3_create(260, 150, 45), 50, mat_dielectric(1.5)));
+  hittable_list_add(world, sphere_create(vec3_create(0, 150, 145), 50, mat_metal(color_create(0.8, 0.8, 0.9), 1.0)));
+
+  hittable* boundary = sphere_create(vec3_create(360,150,145), 70, mat_dielectric(1.5));
+  hittable_list_add(world, boundary);
+  hittable_list_add(world, constant_medium_create_color(boundary, 0.2, color_create(0.2, 0.4, 0.9)));
+  
+  boundary = sphere_create(vec3_create(0,0,0), 5000, mat_dielectric(1.5));
+  hittable_list_add(world, constant_medium_create_color(boundary, .0001, color_create(1,1,1)));
+
+  texture* earth_texture = image_texture_create("earthmap.jpg");
+  material* emat = mat_lambertian_tx(earth_texture);
+  hittable_list_add(world, sphere_create(vec3_create(400,200,400), 100, emat));
+  
+  texture* pertext = noise_texture_create(0.2);
+  hittable_list_add(world, sphere_create(vec3_create(220,280,300), 80, mat_lambertian_tx(pertext)));
+
+  hittable* boxes2 = hittable_list_create();
+  material* white = mat_lambertian(color_create(.73, .73, .73));
+  int ns = 1000;
+  for (int j = 0; j < ns; j++) {
+    hittable_list_add(boxes2, sphere_create(vec3_random_range(0, 165), 10, white));
+  }
+
+  hittable_list* boxes2_data = (hittable_list*)boxes2->data;
+  hittable* bvh2 = bvh_node_create_range(boxes2_data);
+  hittable* rotated = rotate_object_y(bvh2, 15);
+  hittable* translated = translate_obj(rotated, vec3_create(-100,270,395));
+  hittable_list_add(world, translated);
+
+  camera cam;
+  cam.aspect_ratio      = 1.0;
+  cam.image_width       = image_width;
+  cam.samples_per_pixel = samples_per_pixel;
+  cam.max_depth         = max_depth;
+  cam.background        = color_create(0,0,0);
+
+  cam.vfov              = 40;
+  cam.lookfrom          = vec3_create(478, 278, -600);
+  cam.lookat            = vec3_create(278, 278, 0);
+  cam.vup               = vec3_create(0,1,0);
+
+  cam.defocus_angle     = 0;
+  cam.focus_dist        = 10.0;
+
+  camera_initialize(&cam);
+  render(world, &cam);
+}
+
 int main() {
-  switch (8) {
+  switch (0) {
     case 1: bouncing_spheres(); break;
     case 2: checkered_spheres(); break;
     case 3: earth(); break;
@@ -436,5 +518,7 @@ int main() {
     case 6: simple_light(); break;
     case 7: cornell_box(); break;
     case 8: cornell_smoke(); break;
+    case 9: final_scene(800, 10000, 40); break;
+    default: final_scene(400, 250, 4); break;
   }
 }
