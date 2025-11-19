@@ -1,15 +1,17 @@
 #include "core/color.h"
 #include "core/hittable.h"
 #include "core/hittable_list.h"
+#include "core/rotate_y.h"
 #include "core/vec3.h"
 #include "core/camera.h"
 #include "core/translate.h"
+#include "core/constant_medium.h"
 #include "materials/diffuse_light.h"
 #include "materials/lambertian.h"
 #include "materials/material.h"
 #include "materials/metal.h"
 #include "materials/dielectric.h"
-#include "textures/solid_color.h"
+#include "materials/isotropic.h"
 #include "utils/rtweekend.h"
 #include "utils/open_rendered_image.h"
 #include "geometries/sphere.h"
@@ -18,6 +20,7 @@
 #include "textures/checker_texture.h"
 #include "textures/noise_texture.h"
 #include "textures/perlin.h"
+#include "textures/solid_color.h"
 #include "accel/bvh.h"
 #include "textures/image_texture.h"
 
@@ -324,11 +327,16 @@ void cornell_box() {
   hittable_list_add(world, quad_create(vec3_create(555,555,555), vec3_create(-555,0,0), vec3_create(0,0,-555), white));
   hittable_list_add(world, quad_create(vec3_create(0,0,555), vec3_create(555,0,0), vec3_create(0,555,0), white));
 
+  fprintf(stderr, "Creating box 1\n");
   hittable* box1 = create_box(vec3_create(0,0,0), vec3_create(165,330,165), white);
+  fprintf(stderr, "Rotating box 1\n");
+  box1 = rotate_object_y(box1, 15);
+  fprintf(stderr, "Translating box 1\n");
   box1 = translate_obj(box1, vec3_create(265, 0, 295));
   hittable_list_add(world, box1);
 
   hittable* box2 = create_box(vec3_create(0,0,0), vec3_create(165,165,165), white);  
+  box2 = rotate_object_y(box2, -18);
   box2 = translate_obj(box2, vec3_create(130, 0, 65));
   hittable_list_add(world, box2);
 
@@ -369,60 +377,57 @@ void cornell_box() {
   }
 }
 
-void coordinate_test() {
+void cornell_smoke() {
   hittable* world = hittable_list_create();
-  
-  // Materials - different colors for each axis
-  material* red   = mat_lambertian(color_create(1, 0, 0));  // X axis
-  material* green = mat_lambertian(color_create(0, 1, 0));  // Y axis
-  material* blue  = mat_lambertian(color_create(0, 0, 1));  // Z axis
-  material* white = diffuse_light_create_color(color_create(50, 50, 20));  // Origin
-  
-  hittable* orb = create_box(vec3_create(-50, 50, 50), vec3_create(50, -50, -50), green);
-  // Origin reference (white)
-  //hittable_list_add(world, sphere_create(vec3_create(0, 0, 0), 10, white));
-  //hittable_list_add(world, orb);
-  hittable* translated_orb = translate_obj(orb, vec3_create(100, 200, 0));
-  hittable_list_add(world, translated_orb);
-  // X axis (red) - left/right
-  hittable_list_add(world, sphere_create(vec3_create(200, 0, 0), 30, red));   // Right (+X)
-  hittable_list_add(world, sphere_create(vec3_create(-200, 0, 0), 30, white));  // Left (-X)
-  
-  // Y axis (green) - down/up
-  hittable_list_add(world, sphere_create(vec3_create(0, 200, 0), 30, green));   // Up (+Y)
-  hittable_list_add(world, sphere_create(vec3_create(0, -200, 0), 30, white));  // Down (-Y)
-  
-  // Z axis (blue) - back/front
-  hittable_list_add(world, sphere_create(vec3_create(0, 0, 200), 30, blue));   // Towards camera (+Z)
-  hittable_list_add(world, sphere_create(vec3_create(0, 0, -200), 30, white));  // Away from camera (-Z)
+
+  material* red   = mat_lambertian(color_create(.65, .05, .05));
+  material* white = mat_lambertian(color_create(.73, .73, .73));
+  material* green = mat_lambertian(color_create(.12, .45, .15));
+  material* light = diffuse_light_create_color(color_create(7, 7, 7));
+
+  hittable_list_add(world, quad_create(vec3_create(555,0,0), vec3_create(0,555,0), vec3_create(0,0,555), green));
+  hittable_list_add(world, quad_create(vec3_create(0,0,0), vec3_create(0,555,0), vec3_create(0,0,555), red));
+  hittable_list_add(world, quad_create(vec3_create(113,554,127), vec3_create(330,0,0), vec3_create(0,0,305), light));
+  hittable_list_add(world, quad_create(vec3_create(0,555,0), vec3_create(555,0,0), vec3_create(0,0,555), white));
+  hittable_list_add(world, quad_create(vec3_create(0,0,0), vec3_create(555,0,0), vec3_create(0,0,555), white));
+  hittable_list_add(world, quad_create(vec3_create(0,0,555), vec3_create(555,0,0), vec3_create(0,555,0), white));
+
+  hittable* box1 = create_box(vec3_create(0,0,0), vec3_create(165,330,165), white);
+  box1 = rotate_object_y(box1, 15);
+  box1 = translate_obj(box1, vec3_create(265,0,295));
+
+  hittable* box2 = create_box(vec3_create(0,0,0), vec3_create(165,165,165), white);
+  box2 = rotate_object_y(box2, -18);
+  box2 = translate_obj(box2, vec3_create(130,0,65));
+
+  hittable_list_add(world, constant_medium_create_color(box1, 0.01, color_create(0,0,0)));  // Black smoke
+  hittable_list_add(world, constant_medium_create_color(box2, 0.01, color_create(1,1,1)));  // White smoke
 
   camera cam;
-  cam.aspect_ratio      = 1;
+  cam.aspect_ratio      = 1.0;
   cam.image_width       = 600;
   cam.samples_per_pixel = 200;
   cam.max_depth         = 50;
-  cam.background        = color_create(0.0, 0.0, 0.0);
+  cam.background        = color_create(0, 0, 0);
 
   cam.vfov              = 40;
-  cam.lookfrom          = vec3_create(400, 100, -500);
-  cam.lookat            = vec3_create(0, 0, 0);
+  cam.lookfrom          = vec3_create(278, 278, -800);
+  cam.lookat            = vec3_create(278, 278, 0);
   cam.vup               = vec3_create(0, 1, 0);
-  
-  cam.defocus_angle     = 0.0;
+
+  cam.defocus_angle     = 0;  
   cam.focus_dist        = 10.0;
 
-
   camera_initialize(&cam);
+  render(world, &cam);
 
-  camera_diagnostics(&cam);
-  render(world, &cam);  
   if (open_file("./image.ppm") == 1) {
     fprintf(stderr, "Could not find picture in path");
   }
 }
 
 int main() {
-  switch (7) {
+  switch (8) {
     case 1: bouncing_spheres(); break;
     case 2: checkered_spheres(); break;
     case 3: earth(); break;
@@ -430,6 +435,6 @@ int main() {
     case 5: quads(); break;
     case 6: simple_light(); break;
     case 7: cornell_box(); break;
-    case 8: coordinate_test(); break;
+    case 8: cornell_smoke(); break;
   }
 }
