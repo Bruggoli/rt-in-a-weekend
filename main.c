@@ -3,6 +3,7 @@
 #include "core/hittable_list.h"
 #include "core/vec3.h"
 #include "core/camera.h"
+#include "core/translate.h"
 #include "materials/diffuse_light.h"
 #include "materials/lambertian.h"
 #include "materials/material.h"
@@ -19,6 +20,7 @@
 #include "textures/perlin.h"
 #include "accel/bvh.h"
 #include "textures/image_texture.h"
+
 
 void bouncing_spheres() {
   
@@ -310,17 +312,26 @@ void simple_light() {
 void cornell_box() {
   hittable* world = hittable_list_create();
 
-material* red   = mat_lambertian(color_create(.65, .05, .05));
-material* white = mat_lambertian(color_create(.73, .73, .73));
-material* green = mat_lambertian(color_create(.12, .45, .15));
-material* light = diffuse_light_create_color(color_create(15, 15, 15));
+  material* red   = mat_lambertian(color_create(.65, .05, .05));
+  material* white = mat_lambertian(color_create(.73, .73, .73));
+  material* green = mat_lambertian(color_create(.12, .45, .15));
+  material* light = diffuse_light_create_color(color_create(15, 15, 15));
 
-hittable_list_add(world, quad_create(vec3_create(555,0,0), vec3_create(0,555,0), vec3_create(0,0,555), green));
-hittable_list_add(world, quad_create(vec3_create(0,0,0), vec3_create(0,555,0), vec3_create(0,0,555), red));
-hittable_list_add(world, quad_create(vec3_create(343, 554, 332), vec3_create(-130,0,0), vec3_create(0,0,-105), light));
-hittable_list_add(world, quad_create(vec3_create(0,0,0), vec3_create(555,0,0), vec3_create(0,0,555), white));
-hittable_list_add(world, quad_create(vec3_create(555,555,555), vec3_create(-555,0,0), vec3_create(0,0,-555), white));
-hittable_list_add(world, quad_create(vec3_create(0,0,555), vec3_create(555,0,0), vec3_create(0,555,0), white));
+  hittable_list_add(world, quad_create(vec3_create(555,0,0), vec3_create(0,555,0), vec3_create(0,0,555), green));
+  hittable_list_add(world, quad_create(vec3_create(0,0,0), vec3_create(0,555,0), vec3_create(0,0,555), red));
+  hittable_list_add(world, quad_create(vec3_create(343, 554, 332), vec3_create(-130,0,0), vec3_create(0,0,-105), light));
+  hittable_list_add(world, quad_create(vec3_create(0,0,0), vec3_create(555,0,0), vec3_create(0,0,555), white));
+  hittable_list_add(world, quad_create(vec3_create(555,555,555), vec3_create(-555,0,0), vec3_create(0,0,-555), white));
+  hittable_list_add(world, quad_create(vec3_create(0,0,555), vec3_create(555,0,0), vec3_create(0,555,0), white));
+
+  hittable* box1 = create_box(vec3_create(0,0,0), vec3_create(165,330,165), white);
+  box1 = translate_obj(box1, vec3_create(265, 0, 295));
+  hittable_list_add(world, box1);
+
+  hittable* box2 = create_box(vec3_create(0,0,0), vec3_create(165,165,165), white);  
+  box2 = translate_obj(box2, vec3_create(130, 0, 65));
+  hittable_list_add(world, box2);
+
   fprintf(stderr, "Finished adding objects to world\n");
 
 // set up bvh
@@ -332,7 +343,6 @@ hittable_list_add(world, quad_create(vec3_create(0,0,555), vec3_create(555,0,0),
   hittable* new_world = hittable_list_create();
   hittable_list_add(new_world, bvh_root);
   world = new_world;
-
 
   camera cam;
   cam.aspect_ratio      = 1;

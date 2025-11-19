@@ -73,7 +73,6 @@ aabb bvh_node_bounding_box(hittable* self) {
 
 int box_compare(const void* a, const void* b, int axis_index) {
 
-    // What's actually stored at these addresses?
   hittable* ha = *(hittable**)a;
   hittable* hb = *(hittable**)b;
 

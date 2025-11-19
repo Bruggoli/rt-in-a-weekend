@@ -18,6 +18,10 @@ interval interval_enclose(interval a, interval b) {
   return i;
 }
 
+interval interval_add(interval ival, double displacement) {
+  return interval_create(ival.min + displacement, ival.max + displacement);
+}
+
 double interval_size(interval i){
   return i.max - i.min;
 }

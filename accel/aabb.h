@@ -28,6 +28,8 @@ static inline interval axis_interval(aabb* bb, int n) {
 
 int longest_axis(aabb* self);
 
+aabb aabb_offset(aabb box, vec3 offset);
+
 static inline bool aabb_hit(aabb* bb ,ray r, interval ray_t) {
   point3  ray_orig  = r.orig;
   vec3    ray_dir   = r.dir;

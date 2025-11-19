@@ -28,7 +28,6 @@ aabb aabb_create_from_point(point3 a, point3 b) {
 
 
 aabb aabb_add(aabb box0, aabb box1) {
-
   aabb box_out;
   box_out.x = interval_enclose(box0.x, box1.x);
   box_out.y = interval_enclose(box0.y, box1.y);
@@ -36,6 +35,13 @@ aabb aabb_add(aabb box0, aabb box1) {
   return box_out;
 }
 
+aabb aabb_offset(aabb box, vec3 offset) {
+  aabb offset_box;
+  offset_box.x = interval_add(box.x, offset.e[0]);
+  offset_box.y = interval_add(box.y, offset.e[1]);
+  offset_box.z = interval_add(box.z, offset.e[2]);
+  return offset_box;
+}
 
 int longest_axis(aabb* bb) {
   double x = interval_size(bb->x);

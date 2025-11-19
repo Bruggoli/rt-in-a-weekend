@@ -23,4 +23,6 @@ double clamp(interval i, double x);
 
 interval interval_expand(interval i, double delta);
 
+interval interval_add(interval ival, double displacement);
+
 #endif

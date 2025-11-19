@@ -35,4 +35,5 @@ struct hittable {
   void* data;
 };
 
+
 #endif
