@@ -33,7 +33,7 @@ hittable* translate_obj(hittable* object, vec3 offset) {
           bbox_after.y.min, bbox_after.y.max,
           bbox_after.z.min, bbox_after.z.max);
   
-  return object;
+  return h;
 }
 
 

@@ -347,13 +347,65 @@ void cornell_box() {
   camera cam;
   cam.aspect_ratio      = 1;
   cam.image_width       = 600;
-  cam.samples_per_pixel = 200;
-  cam.max_depth         = 50;
+  cam.samples_per_pixel = 100;
+  cam.max_depth         = 20;
   cam.background        = color_create(0, 0, 0);
 
   cam.vfov              = 40;
   cam.lookfrom          = vec3_create(278, 278, -800);
   cam.lookat            = vec3_create(278, 278, 0);
+  cam.vup               = vec3_create(0, 1, 0);
+  
+  cam.defocus_angle     = 0.0;
+  cam.focus_dist        = 10.0;
+
+
+  camera_initialize(&cam);
+
+  camera_diagnostics(&cam);
+  render(world, &cam);  
+  if (open_file("./image.ppm") == 1) {
+    fprintf(stderr, "Could not find picture in path");
+  }
+}
+
+void coordinate_test() {
+  hittable* world = hittable_list_create();
+  
+  // Materials - different colors for each axis
+  material* red   = mat_lambertian(color_create(1, 0, 0));  // X axis
+  material* green = mat_lambertian(color_create(0, 1, 0));  // Y axis
+  material* blue  = mat_lambertian(color_create(0, 0, 1));  // Z axis
+  material* white = diffuse_light_create_color(color_create(50, 50, 20));  // Origin
+  
+  hittable* orb = create_box(vec3_create(-50, 50, 50), vec3_create(50, -50, -50), green);
+  // Origin reference (white)
+  //hittable_list_add(world, sphere_create(vec3_create(0, 0, 0), 10, white));
+  //hittable_list_add(world, orb);
+  hittable* translated_orb = translate_obj(orb, vec3_create(100, 200, 0));
+  hittable_list_add(world, translated_orb);
+  // X axis (red) - left/right
+  hittable_list_add(world, sphere_create(vec3_create(200, 0, 0), 30, red));   // Right (+X)
+  hittable_list_add(world, sphere_create(vec3_create(-200, 0, 0), 30, white));  // Left (-X)
+  
+  // Y axis (green) - down/up
+  hittable_list_add(world, sphere_create(vec3_create(0, 200, 0), 30, green));   // Up (+Y)
+  hittable_list_add(world, sphere_create(vec3_create(0, -200, 0), 30, white));  // Down (-Y)
+  
+  // Z axis (blue) - back/front
+  hittable_list_add(world, sphere_create(vec3_create(0, 0, 200), 30, blue));   // Towards camera (+Z)
+  hittable_list_add(world, sphere_create(vec3_create(0, 0, -200), 30, white));  // Away from camera (-Z)
+
+  camera cam;
+  cam.aspect_ratio      = 1;
+  cam.image_width       = 600;
+  cam.samples_per_pixel = 200;
+  cam.max_depth         = 50;
+  cam.background        = color_create(0.0, 0.0, 0.0);
+
+  cam.vfov              = 40;
+  cam.lookfrom          = vec3_create(400, 100, -500);
+  cam.lookat            = vec3_create(0, 0, 0);
   cam.vup               = vec3_create(0, 1, 0);
   
   cam.defocus_angle     = 0.0;
@@ -378,5 +430,6 @@ int main() {
     case 5: quads(); break;
     case 6: simple_light(); break;
     case 7: cornell_box(); break;
+    case 8: coordinate_test(); break;
   }
 }
