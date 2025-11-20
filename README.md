@@ -63,4 +63,4 @@ Just use c++ for this kind of stuff. The C version feels incredibly verbose comp
 
 ## Dependencies
 
-Standard C library (`math.h`, `stdlib.h`, `stdio.h`), OpenMP
+Standard C library (`math.h`, `stdlib.h`, `stdio.h`), OpenMP, [stb_image](https://github.com/nothings/stb)
