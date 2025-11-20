@@ -523,6 +523,6 @@ int main() {
     case 7: cornell_box(); break;
     case 8: cornell_smoke(); break;
     case 9: final_scene(800, 10000, 40); break;
-    default: final_scene(800, 1000, 4); break;
+    default: final_scene(400, 250, 4); break;
   }
 }
