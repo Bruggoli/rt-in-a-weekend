@@ -79,18 +79,11 @@ bool is_interior(double a, double b, hit_record* rec) {
 }
 
 hittable* create_box(point3 a, point3 b, material* mat) {
-  fprintf(stderr, "\n=== BOX CREATE ===\n");
-  fprintf(stderr, "Corner A: (%.2f, %.2f, %.2f)\n", a.e[0], a.e[1], a.e[2]);
-  fprintf(stderr, "Corner B: (%.2f, %.2f, %.2f)\n", b.e[0], b.e[1], b.e[2]);
+
   hittable* sides = hittable_list_create();
 
   point3 min = vec3_create(fmin(a.e[0], b.e[0]), fmin(a.e[1], b.e[1]), fmin(a.e[2], b.e[2]));
   point3 max = vec3_create(fmax(a.e[0], b.e[0]), fmax(a.e[1], b.e[1]), fmax(a.e[2], b.e[2]));
-
-  fprintf(stderr, "Box Min: (%.2f, %.2f, %.2f)\n", min.e[0], min.e[1], min.e[2]);
-  fprintf(stderr, "Box Max: (%.2f, %.2f, %.2f)\n", max.e[0], max.e[1], max.e[2]);
-  fprintf(stderr, "Box Size: %.2f x %.2f x %.2f\n", 
-          max.e[0] - min.e[0], max.e[1] - min.e[1], max.e[2] - min.e[2]);
 
   vec3 dx = vec3_create(max.e[0] - min.e[0], 0, 0);
   vec3 dy = vec3_create(0, max.e[1] - min.e[1], 0);

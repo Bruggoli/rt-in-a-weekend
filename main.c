@@ -505,11 +505,15 @@ void final_scene(int image_width, int samples_per_pixel, int max_depth) {
   cam.focus_dist        = 10.0;
 
   camera_initialize(&cam);
-  render(world, &cam);
+  render(world, &cam);  
+
+  if (open_file("./image.ppm") == 1) {
+    fprintf(stderr, "Could not find picture in path");
+  }
 }
 
 int main() {
-  switch (0) {
+  switch (9) {
     case 1: bouncing_spheres(); break;
     case 2: checkered_spheres(); break;
     case 3: earth(); break;
@@ -519,6 +523,6 @@ int main() {
     case 7: cornell_box(); break;
     case 8: cornell_smoke(); break;
     case 9: final_scene(800, 10000, 40); break;
-    default: final_scene(400, 250, 4); break;
+    default: final_scene(800, 1000, 4); break;
   }
 }

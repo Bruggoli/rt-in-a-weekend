@@ -6,6 +6,7 @@
 #include "../utils/rtweekend.h"
 #include "vec3.h"
 #include <stdio.h>
+#include <omp.h>
 
 
 // Sets default values in case they are not set where they are used
@@ -24,20 +25,39 @@ point3  vup               = (vec3){0, 1, 0};
 
 
 void render(hittable* world, camera* cam) {
+
+  // allocate buffer for all pixels
+  color* image_buffer = malloc(cam->image_width*cam->image_height*sizeof(color));
   
   printf("P3\n%d %d\n255\n", cam->image_width, cam->image_height);
+
+  #pragma omp parallel for schedule(dynamic, 1)
   for (int j = 0; j < cam->image_height; j++) {
+    #pragma omp critical 
+    {
     fprintf(stderr, "\rScanlines remaining: %d/%d", (cam->image_height - j), cam->image_height);
     fflush(stderr);
+    }
     for (int i = 0; i < cam->image_width; i++) {
       color pixel_color = vec3_create(0, 0, 0);
       for (int sample = 0; sample < cam->samples_per_pixel; sample++) {
+        unsigned int seed = omp_get_thread_num() + j;
         ray r = camera_get_ray(cam, i, j);
         pixel_color = vec3_add(pixel_color, ray_color(r, cam->max_depth, world, cam->background));
       }
-    write_color(stdout, vec3_scale( pixel_color, cam->pixel_samples_scale));
+    image_buffer[j * cam->image_width + i] = vec3_scale( pixel_color, cam->pixel_samples_scale);
     }
   }
+
+  
+  // Sequential write to maintain PPM format
+  for (int j = 0; j < cam->image_height; j++) {
+    for (int i = 0; i < cam->image_width; i++) {
+      write_color(stdout, image_buffer[j * cam->image_width + i]);
+    }
+  }
+
+  free(image_buffer);
   fprintf(stderr, "\r                                \n");
   fprintf(stderr, "\rDone.\n");
 }

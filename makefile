@@ -5,7 +5,7 @@ deps = ./core/*.h ./accel/*.h ./utils/*.h ./textures/*.h ./materials/*.h ./geome
 
 OBJ = main.c ./core/*.c ./accel/*.c ./utils/*.c ./textures/*.c ./materials/*.c ./geometries/*.c
 
-LIBS= -lm
+LIBS= -lm -fopenmp
 
 IMG_OUT = image.ppm
 
@@ -20,3 +20,9 @@ run: $(TARGET)
 
 performance:$(TARGET)
 	   time perf record ./$(TARGET) > $(IMG_OUT)
+
+1c:$(TARGET)
+	   time OMP_NUM_THREADS=1 perf record ./$(TARGET) > $(IMG_OUT)
+
+12c:$(TARGET)
+	   time OMP_NUM_THREADS=12 perf record  ./$(TARGET) > $(IMG_OUT)
