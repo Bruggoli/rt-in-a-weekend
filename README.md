@@ -1,5 +1,7 @@
 Hats off to [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html).
+
 The instructions are clear enough for me (a complete C beginner) to understand.
+
 I used Claude.ai to start with to help me with the concept of polymorphic C code, translating the book scenes, and some obscure(to me!) pointer bugs.
 
 # C Ray Tracer
@@ -37,7 +39,9 @@ Renders default scene (spheres with varied materials). Adjust parameters in `mai
 ## Architecture
 
 **Object system:** Function pointer vtable pattern for polymorphism without C++
+
 **Acceleration:** BVH with surface area heuristic
+
 **Memory:** Stack allocation where possible, manual management for scene graph
 
 ## Performance
@@ -46,7 +50,12 @@ Renders default scene (spheres with varied materials). Adjust parameters in `mai
 
 Potential optimizations:
 - SIMD vectorization for ray-AABB tests
-- GPU port via Metal (requires architecture rewrite)
+- CUDA implementation
+- Actually freeing unused memory
+- Most likely many more that im not aware of!
+
+## Notes
+The project uses free() very rarely, since its a run-once-and-quit program, but looking into doing it properly down the road. The final scene uses around 1gb RAM during the process, but the cpu is pinned while running.
 
 ## Project takeaways
 Just use c++ for this kind of stuff. The C version feels incredibly verbose compared to the code presented in the ray tracing series.
