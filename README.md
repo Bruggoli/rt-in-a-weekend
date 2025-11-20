@@ -19,7 +19,7 @@ Path tracer implementation in C, based on "Ray Tracing in One Weekend" series.
 
 ## Build
 ```bash
-clang -O3 -o raytracer main.c -lm -fopenmp
+clang -O3 -o raytracer main.c ./*/*.c -lm -fopenmp
 ```
 
 ## Usage
