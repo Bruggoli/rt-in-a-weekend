@@ -42,7 +42,7 @@ Renders default scene (spheres with varied materials). Adjust parameters in `mai
 
 ## Performance
 
-~11.5 hours on M1 Mac (1920x1080, 500 samples, max_depth=50)
+~11.5 hours on M1 Mac (800x800, 500 samples, max_depth=50)
 
 Potential optimizations:
 - SIMD vectorization for ray-AABB tests
@@ -54,4 +54,4 @@ Just use c++ for this kind of stuff. The C version feels incredibly verbose comp
 
 ## Dependencies
 
-Standard C library only (`math.h`, `stdlib.h`, `stdio.h`)
+Standard C library (`math.h`, `stdlib.h`, `stdio.h`), OpenMP
